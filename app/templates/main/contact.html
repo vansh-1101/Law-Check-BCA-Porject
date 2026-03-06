@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us — LegalConnect{% endblock %}
+
+{% block content %}
+<div style="max-width:960px; margin:0 auto; padding:var(--space-12) var(--space-6);">
+
+    <div class="animate-fade-up" style="margin-bottom:var(--space-10);">
+        <h1 style="margin-bottom:var(--space-2);">Contact Us</h1>
+        <p style="font-size:1.0625rem; color:var(--text-secondary);">Have a question? We'd love to hear from you.</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash-msg flash-{{ category }}" style="margin-bottom:var(--space-4);">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div style="display:grid; grid-template-columns:2fr 1fr; gap:var(--space-8);">
+
+        <!-- Contact Form -->
+        <div class="card animate-fade-up animate-fade-up-delay-1" style="border-radius:var(--radius-xl);">
+            <div class="card-body" style="padding:var(--space-8);">
+                <h2 style="font-size:1.375rem; margin-bottom:var(--space-6);">Send us a Message</h2>
+
+                <form method="POST" action="{{ url_for('main.contact') }}">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                        <div class="form-group">
+                            <label for="name" class="form-label">Full Name <span class="required">*</span></label>
+                            <input type="text" id="name" name="name" required minlength="2" maxlength="100"
+                                value="{{ request.form.get('name', '') }}" placeholder="e.g. Priya Sharma"
+                                class="form-input" aria-label="Enter your full name">
+                            {% if errors and errors.name %}
+                            <p class="form-error">{{ errors.name }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email <span class="required">*</span></label>
+                            <input type="email" id="email" name="email" required maxlength="120"
+                                value="{{ request.form.get('email', '') }}" placeholder="e.g. priya@gmail.com"
+                                class="form-input" aria-label="Enter your email">
+                            {% if errors and errors.email %}
+                            <p class="form-error">{{ errors.email }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject" class="form-label">Subject <span class="required">*</span></label>
+                        <input type="text" id="subject" name="subject" required minlength="3" maxlength="200"
+                            value="{{ request.form.get('subject', '') }}" placeholder="What is this about?"
+                            class="form-input" aria-label="Enter the subject">
+                        {% if errors and errors.subject %}
+                        <p class="form-error">{{ errors.subject }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message" class="form-label">Message <span class="required">*</span></label>
+                        <textarea id="message" name="message" required rows="5" minlength="10" maxlength="2000"
+                            placeholder="Describe your query in detail..." class="form-input"
+                            aria-label="Enter your message"
+                            style="resize:vertical; min-height:120px;">{{ request.form.get('message', '') }}</textarea>
+                        {% if errors and errors.message %}
+                        <p class="form-error">{{ errors.message }}</p>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%; padding:var(--space-4);"
+                        aria-label="Send message">
+                        📩 Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Contact Info Sidebar -->
+        <div style="display:flex; flex-direction:column; gap:var(--space-6);"
+            class="animate-fade-up animate-fade-up-delay-2">
+            <div class="card" style="border-radius:var(--radius-xl);">
+                <div class="card-body" style="padding:var(--space-6);">
+                    <h3 style="font-size:1.125rem; margin-bottom:var(--space-5);">Get in Touch</h3>
+
+                    <div style="display:flex; flex-direction:column; gap:var(--space-5);">
+                        <div style="display:flex; align-items:flex-start; gap:var(--space-3);">
+                            <div class="icon-box"
+                                style="width:40px; height:40px; font-size:1rem; border-radius:var(--radius-md);"
+                                aria-hidden="true">📧</div>
+                            <div>
+                                <p
+                                    style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:2px;">
+                                    Email</p>
+                                <a href="mailto:support@legalconnect.in"
+                                    style="font-size:0.875rem; color:var(--navy);">support@legalconnect.in</a>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; align-items:flex-start; gap:var(--space-3);">
+                            <div class="icon-box"
+                                style="width:40px; height:40px; font-size:1rem; border-radius:var(--radius-md);"
+                                aria-hidden="true">📞</div>
+                            <div>
+                                <p
+                                    style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:2px;">
+                                    Phone</p>
+                                <a href="tel:+911234567890" style="font-size:0.875rem; color:var(--navy);">+91
+                                    1234567890</a>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; align-items:flex-start; gap:var(--space-3);">
+                            <div class="icon-box"
+                                style="width:40px; height:40px; font-size:1rem; border-radius:var(--radius-md);"
+                                aria-hidden="true">📍</div>
+                            <div>
+                                <p
+                                    style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:2px;">
+                                    Address</p>
+                                <p style="font-size:0.875rem; color:var(--text-secondary); line-height:1.5;">
+                                    LegalConnect India<br>
+                                    123 Legal Street<br>
+                                    Mumbai, Maharashtra 400001
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                style="background:linear-gradient(135deg, var(--navy), var(--navy-light)); border-radius:var(--radius-xl); padding:var(--space-6); color:var(--text-inverse);">
+                <h3 style="color:var(--text-inverse); font-size:1.125rem; margin-bottom:var(--space-3);">Need Urgent
+                    Legal Help?</h3>
+                <p
+                    style="font-size:0.875rem; color:rgba(255,255,255,0.65); margin-bottom:var(--space-4); line-height:1.6;">
+                    Browse our verified lawyers and book a consultation right away.
+                </p>
+                <a href="{{ url_for('main.index') }}" class="btn btn-accent btn-sm" aria-label="Get started">
+                    Get Started →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        div[style*="grid-template-columns:2fr 1fr"] {
+            grid-template-columns: 1fr !important;
+        }
+
+        div[style*="grid-template-columns:1fr 1fr"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

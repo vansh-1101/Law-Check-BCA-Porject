@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width:620px; margin:0 auto; padding:var(--space-12) var(--space-6);">
+    <div class="card animate-fade-up" style="border-radius:var(--radius-xl); box-shadow:var(--shadow-xl);">
+        <div class="card-body" style="padding:var(--space-8);">
+            <h1 style="font-size:1.5rem; margin-bottom:var(--space-2);">
+                {% if section %}Edit Section {{ section.section_number }}{% else %}Add Section to {{ act.name }}{% endif
+                %}
+            </h1>
+            <p style="color:var(--text-secondary); margin-bottom:var(--space-6);">{{ act.short_name }} ({{ act.year }})
+            </p>
+
+            <form method="POST">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                    <div class="form-group">
+                        <label for="section_number" class="form-label">Section Number <span
+                                class="required">*</span></label>
+                        <input type="text" id="section_number" name="section_number" required
+                            value="{{ section.section_number if section else request.form.get('section_number', '') }}"
+                            placeholder="e.g. 302, 498A" class="form-input" aria-label="Section number">
+                        {% if errors and errors.section_number %}<p class="form-error">{{ errors.section_number }}</p>{%
+                        endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="title" class="form-label">Title <span class="required">*</span></label>
+                        <input type="text" id="title" name="title" required
+                            value="{{ section.title if section else request.form.get('title', '') }}"
+                            placeholder="e.g. Punishment for murder" class="form-input" aria-label="Section title">
+                        {% if errors and errors.title %}<p class="form-error">{{ errors.title }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">Description <span class="required">*</span></label>
+                    <textarea id="description" name="description" required rows="4"
+                        placeholder="Full description of this section..." class="form-input" style="resize:vertical;"
+                        aria-label="Section description">{{ section.description if section else request.form.get('description', '') }}</textarea>
+                    {% if errors and errors.description %}<p class="form-error">{{ errors.description }}</p>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="penalty" class="form-label">Penalty / Punishment</label>
+                    <textarea id="penalty" name="penalty" rows="2"
+                        placeholder="e.g. Imprisonment up to 3 years and fine" class="form-input"
+                        style="resize:vertical;"
+                        aria-label="Penalty">{{ section.penalty if section else request.form.get('penalty', '') }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="keywords" class="form-label">Keywords (comma-separated, for search/analyzer)</label>
+                    <input type="text" id="keywords" name="keywords"
+                        value="{{ section.keywords if section else request.form.get('keywords', '') }}"
+                        placeholder="e.g. murder, kill, homicide, death" class="form-input" aria-label="Keywords">
+                </div>
+
+                <!-- Boolean flags -->
+                <div
+                    style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-4); margin-bottom:var(--space-6);">
+                    <label
+                        style="display:flex; align-items:center; gap:var(--space-2); background:var(--paper); padding:var(--space-3); border-radius:var(--radius-md); cursor:pointer; font-size:0.875rem;">
+                        <input type="checkbox" name="is_bailable" {% if section and section.is_bailable %}checked{%
+                            endif %} style="accent-color:var(--navy); width:16px; height:16px;">
+                        <span>Bailable</span>
+                    </label>
+                    <label
+                        style="display:flex; align-items:center; gap:var(--space-2); background:var(--paper); padding:var(--space-3); border-radius:var(--radius-md); cursor:pointer; font-size:0.875rem;">
+                        <input type="checkbox" name="is_cognizable" {% if section and section.is_cognizable %}checked{%
+                            endif %} style="accent-color:var(--navy); width:16px; height:16px;">
+                        <span>Cognizable</span>
+                    </label>
+                    <label
+                        style="display:flex; align-items:center; gap:var(--space-2); background:var(--paper); padding:var(--space-3); border-radius:var(--radius-md); cursor:pointer; font-size:0.875rem;">
+                        <input type="checkbox" name="is_compoundable" {% if section and section.is_compoundable
+                            %}checked{% endif %} style="accent-color:var(--navy); width:16px; height:16px;">
+                        <span>Compoundable</span>
+                    </label>
+                </div>
+
+                <div style="display:flex; gap:var(--space-4);">
+                    <button type="submit" class="btn btn-primary" style="flex:1; padding:var(--space-4);"
+                        aria-label="Save">💾 {% if section %}Update Section{% else %}Add Section{% endif %}</button>
+                    <a href="{{ url_for('admin.manage_laws') }}" class="btn btn-ghost"
+                        style="flex:1; padding:var(--space-4); text-align:center;" aria-label="Cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

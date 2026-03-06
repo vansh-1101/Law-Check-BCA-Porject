@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Legal Problem Analyzer — LegalConnect{% endblock %}
+
+{% block content %}
+<!-- Dark analyzer header -->
+<section class="analyzer-section" style="padding:var(--space-16) 0;">
+    <div class="container">
+        <div style="text-align:center; margin-bottom:var(--space-10);" class="animate-fade-up">
+            <h1 style="color:var(--text-inverse); margin-bottom:var(--space-4);">
+                Legal Problem Analyzer
+            </h1>
+            <p style="color:rgba(255,255,255,0.6); font-size:1.125rem; max-width:600px; margin:0 auto;">
+                Describe your legal problem and get instant guidance with applicable Indian laws
+            </p>
+        </div>
+
+        <!-- Main Form Card -->
+        <div class="card animate-fade-up animate-fade-up-delay-1"
+            style="max-width:800px; margin:0 auto; border-radius:var(--radius-xl); box-shadow:var(--shadow-2xl);">
+            <div class="card-body" style="padding:var(--space-8);">
+                <form method="POST" action="{{ url_for('main.analyze_problem') }}">
+                    <div class="form-group" style="margin-bottom:var(--space-6);">
+                        <label for="problem" class="form-label" style="font-size:1rem;">Describe Your Legal
+                            Problem</label>
+                        <textarea name="problem" id="problem" rows="6" class="form-input"
+                            style="font-size:1rem; min-height:160px; resize:vertical;"
+                            placeholder="Example: Someone stole my mobile phone from my bag while I was traveling in the metro. The phone was worth ₹25,000 and had important personal data."
+                            required aria-label="Describe your legal problem in detail"></textarea>
+                        <p class="form-hint">💡 Be as detailed as possible. Include what happened, when, where, and any
+                            other relevant information.</p>
+                    </div>
+
+                    {% if error %}
+                    <div class="flash-msg flash-danger" style="margin-bottom:var(--space-4);">{{ error }}</div>
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-accent"
+                        style="width:100%; padding:var(--space-4); font-size:1.0625rem;"
+                        aria-label="Analyze my legal problem">
+                        🔍 Analyze My Problem
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Example Problems -->
+<section style="padding:var(--space-12) 0; background:var(--paper);">
+    <div class="container" style="max-width:800px;">
+        <div class="card reveal" style="border-radius:var(--radius-xl);">
+            <div class="card-body" style="padding:var(--space-8);">
+                <h2 style="font-size:1.375rem; margin-bottom:var(--space-3);">📝 Try These Examples</h2>
+                <p style="color:var(--text-secondary); margin-bottom:var(--space-6); font-size:0.9375rem;">Click on any
+                    example below to quickly fill the form:</p>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                    <button type="button" onclick="fillExample('theft')" class="card card-accent"
+                        style="text-align:left; cursor:pointer; border:2px solid rgba(var(--navy-rgb),0.06);"
+                        aria-label="Fill theft example">
+                        <div class="card-body"
+                            style="padding:var(--space-4); display:flex; align-items:flex-start; gap:var(--space-3);">
+                            <span style="font-size:1.75rem;" aria-hidden="true">📱</span>
+                            <div>
+                                <h3
+                                    style="font-family:var(--font-sans); font-weight:700; font-size:0.9375rem; margin-bottom:var(--space-1);">
+                                    Phone Theft</h3>
+                                <p style="color:var(--text-secondary); font-size:0.8125rem;">Mobile phone stolen from
+                                    bag</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="fillExample('assault')" class="card card-accent"
+                        style="text-align:left; cursor:pointer; border:2px solid rgba(var(--navy-rgb),0.06);"
+                        aria-label="Fill assault example">
+                        <div class="card-body"
+                            style="padding:var(--space-4); display:flex; align-items:flex-start; gap:var(--space-3);">
+                            <span style="font-size:1.75rem;" aria-hidden="true">🤕</span>
+                            <div>
+                                <h3
+                                    style="font-family:var(--font-sans); font-weight:700; font-size:0.9375rem; margin-bottom:var(--space-1);">
+                                    Physical Assault</h3>
+                                <p style="color:var(--text-secondary); font-size:0.8125rem;">Injured during a fight</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="fillExample('fraud')" class="card card-accent"
+                        style="text-align:left; cursor:pointer; border:2px solid rgba(var(--navy-rgb),0.06);"
+                        aria-label="Fill fraud example">
+                        <div class="card-body"
+                            style="padding:var(--space-4); display:flex; align-items:flex-start; gap:var(--space-3);">
+                            <span style="font-size:1.75rem;" aria-hidden="true">💰</span>
+                            <div>
+                                <h3
+                                    style="font-family:var(--font-sans); font-weight:700; font-size:0.9375rem; margin-bottom:var(--space-1);">
+                                    Fraud / Cheating</h3>
+                                <p style="color:var(--text-secondary); font-size:0.8125rem;">Sold fake gold jewelry</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="fillExample('harassment')" class="card card-accent"
+                        style="text-align:left; cursor:pointer; border:2px solid rgba(var(--navy-rgb),0.06);"
+                        aria-label="Fill harassment example">
+                        <div class="card-body"
+                            style="padding:var(--space-4); display:flex; align-items:flex-start; gap:var(--space-3);">
+                            <span style="font-size:1.75rem;" aria-hidden="true">⚠️</span>
+                            <div>
+                                <h3
+                                    style="font-family:var(--font-sans); font-weight:700; font-size:0.9375rem; margin-bottom:var(--space-1);">
+                                    Harassment</h3>
+                                <p style="color:var(--text-secondary); font-size:0.8125rem;">Stalking and threats</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="fillExample('property')" class="card card-accent"
+                        style="text-align:left; cursor:pointer; border:2px solid rgba(var(--navy-rgb),0.06);"
+                        aria-label="Fill property dispute example">
+                        <div class="card-body"
+                            style="padding:var(--space-4); display:flex; align-items:flex-start; gap:var(--space-3);">
+                            <span style="font-size:1.75rem;" aria-hidden="true">🏠</span>
+                            <div>
+                                <h3
+                                    style="font-family:var(--font-sans); font-weight:700; font-size:0.9375rem; margin-bottom:var(--space-1);">
+                                    Property Dispute</h3>
+                                <p style="color:var(--text-secondary); font-size:0.8125rem;">Land encroachment issue</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="fillExample('accident')" class="card card-accent"
+                        style="text-align:left; cursor:pointer; border:2px solid rgba(var(--navy-rgb),0.06);"
+                        aria-label="Fill road accident example">
+                        <div class="card-body"
+                            style="padding:var(--space-4); display:flex; align-items:flex-start; gap:var(--space-3);">
+                            <span style="font-size:1.75rem;" aria-hidden="true">🚗</span>
+                            <div>
+                                <h3
+                                    style="font-family:var(--font-sans); font-weight:700; font-size:0.9375rem; margin-bottom:var(--space-1);">
+                                    Road Accident</h3>
+                                <p style="color:var(--text-secondary); font-size:0.8125rem;">Hit by rash driving</p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="card reveal"
+            style="margin-top:var(--space-8); border-radius:var(--radius-xl); background:var(--paper); border:1px solid rgba(var(--navy-rgb),0.06);">
+            <div class="card-body" style="padding:var(--space-6);">
+                <h3 style="font-size:1.125rem; margin-bottom:var(--space-5);">How It Works</h3>
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-6); text-align:center;">
+                    <div>
+                        <div style="font-size:2rem; margin-bottom:var(--space-2);" aria-hidden="true">✍️</div>
+                        <h4
+                            style="font-family:var(--font-sans); font-weight:700; font-size:0.9375rem; margin-bottom:var(--space-1);">
+                            1. Describe</h4>
+                        <p style="font-size:0.8125rem; color:var(--text-secondary);">Write your legal problem in detail
+                        </p>
+                    </div>
+                    <div>
+                        <div style="font-size:2rem; margin-bottom:var(--space-2);" aria-hidden="true">🔍</div>
+                        <h4
+                            style="font-family:var(--font-sans); font-weight:700; font-size:0.9375rem; margin-bottom:var(--space-1);">
+                            2. Analyze</h4>
+                        <p style="font-size:0.8125rem; color:var(--text-secondary);">Our system matches keywords to laws
+                        </p>
+                    </div>
+                    <div>
+                        <div style="font-size:2rem; margin-bottom:var(--space-2);" aria-hidden="true">⚖️</div>
+                        <h4
+                            style="font-family:var(--font-sans); font-weight:700; font-size:0.9375rem; margin-bottom:var(--space-1);">
+                            3. Get Results</h4>
+                        <p style="font-size:0.8125rem; color:var(--text-secondary);">See applicable laws and penalties
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    let examples = {};
+    fetch('/api/example-problems')
+        .then(r => r.json())
+        .then(data => { examples = data; })
+        .catch(() => { });
+
+    function fillExample(type) {
+        const textarea = document.getElementById('problem');
+        if (examples[type]) {
+            textarea.value = examples[type];
+            textarea.focus();
+            textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+</script>
+
+<style>
+    @media (max-width: 768px) {
+        div[style*="grid-template-columns:1fr 1fr"] {
+            grid-template-columns: 1fr !important;
+        }
+
+        div[style*="grid-template-columns:repeat(3"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

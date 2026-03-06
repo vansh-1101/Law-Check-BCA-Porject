@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Indian Laws — LegalConnect{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section style="background:linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); padding:var(--space-16) 0;">
+    <div class="container" style="text-align:center;">
+        <div class="animate-fade-up" style="margin-bottom:var(--space-8);">
+            <h1 style="color:var(--text-inverse); margin-bottom:var(--space-4);">Browse Indian Laws</h1>
+            <p style="color:rgba(255,255,255,0.6); font-size:1.125rem; max-width:600px; margin:0 auto;">
+                Explore comprehensive database of Indian legal acts and sections. No login required.
+            </p>
+        </div>
+
+        <!-- Search Bar -->
+        <div style="max-width:640px; margin:0 auto; position:relative;" class="animate-fade-up animate-fade-up-delay-1">
+            <form action="{{ url_for('main.browse_laws') }}" method="get" style="position:relative;">
+                <input type="text" name="q" value="{{ search_query }}" id="searchInput"
+                    placeholder="Search for acts, sections, or keywords..." class="form-input"
+                    style="background:rgba(255,255,255,0.08); border:2px solid rgba(255,255,255,0.12); color:var(--text-inverse); padding:var(--space-4) var(--space-6); padding-right:100px; font-size:1rem; border-radius:var(--radius-lg);"
+                    aria-label="Search laws">
+                <button type="submit" class="btn btn-accent"
+                    style="position:absolute; right:6px; top:50%; transform:translateY(-50%); padding:var(--space-2) var(--space-5);"
+                    aria-label="Search">
+                    Search
+                </button>
+            </form>
+            <!-- Search Results Dropdown -->
+            <div id="searchResults"
+                style="display:none; position:absolute; z-index:50; width:100%; background:var(--white); border-radius:var(--radius-lg); box-shadow:var(--shadow-2xl); margin-top:var(--space-2); max-height:380px; overflow-y:auto;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Bar -->
+<section class="stats-strip">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number" style="font-size:1.75rem;">{{ total_acts }}</div>
+                <div class="stat-label">Legal Acts Available</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" style="font-size:1.75rem;">{{ total_sections }}</div>
+                <div class="stat-label">Sections Documented</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" style="font-size:1.75rem; color:var(--emerald);">100%</div>
+                <div class="stat-label">Free Access</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Category Filters -->
+<section style="background:var(--paper); padding:var(--space-6) 0; border-bottom:1px solid rgba(var(--navy-rgb),0.06);">
+    <div class="container">
+        <div style="display:flex; flex-wrap:wrap; gap:var(--space-3); justify-content:center;">
+            <a href="{{ url_for('main.browse_laws') }}"
+                class="tab-btn {% if selected_category == 'all' %}tab-btn-primary{% else %}tab-btn-default{% endif %}"
+                aria-label="Show all acts">All Acts</a>
+            {% for category in categories %}
+            <a href="{{ url_for('main.browse_laws', category=category) }}"
+                class="tab-btn {% if selected_category == category %}tab-btn-primary{% else %}tab-btn-default{% endif %}"
+                aria-label="Filter by {{ category }}">{{ category }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section style="padding:var(--space-12) 0; background:var(--white);">
+    <div class="container">
+        <!-- Acts Grid -->
+        <div style="margin-bottom:var(--space-12);">
+            <h2 style="font-size:1.75rem; margin-bottom:var(--space-6);">
+                {% if selected_category != 'all' %}{{ selected_category }} Laws{% else %}All Legal Acts{% endif %}
+                <span style="color:var(--text-muted); font-size:1.125rem; font-weight:400;">({{ acts|length }})</span>
+            </h2>
+
+            {% if acts %}
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-6);">
+                {% for act in acts %}
+                <a href="{{ url_for('main.view_act', act_id=act.id) }}" class="card card-accent"
+                    style="text-decoration:none; border:2px solid rgba(var(--navy-rgb),0.06);">
+                    <div class="card-body" style="padding:var(--space-6);">
+                        <div
+                            style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:var(--space-3);">
+                            <span class="badge
+                                {% if act.category == 'Criminal' %}badge-red
+                                {% elif act.category == 'Civil' %}badge-navy
+                                {% elif act.category == 'Constitutional' %}badge-green
+                                {% elif act.category == 'Corporate' %}badge-navy
+                                {% elif act.category == 'Family' %}badge-gold
+                                {% elif act.category == 'Cyber' %}badge-navy
+                                {% else %}badge-navy{% endif %}">{{ act.category }}</span>
+                            <span style="color:var(--text-muted); font-size:0.8125rem; font-weight:500;">{{ act.year
+                                }}</span>
+                        </div>
+                        <h3
+                            style="font-family:var(--font-serif); font-weight:700; font-size:1.125rem; color:var(--navy); margin-bottom:var(--space-2);">
+                            {{ act.short_name }}</h3>
+                        <p
+                            style="font-size:0.875rem; color:var(--text-secondary); margin-bottom:var(--space-4); line-height:1.6; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                            {{ act.description }}</p>
+                        <div style="font-size:0.8125rem; color:var(--text-muted); font-weight:500;">
+                            📄 {{ act.sections.count() }} sections
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align:center; padding:var(--space-12) 0;">
+                <div style="font-size:3rem; margin-bottom:var(--space-4);" aria-hidden="true">🔍</div>
+                <h3 style="font-size:1.375rem; margin-bottom:var(--space-2);">No acts found</h3>
+                <p style="color:var(--text-muted);">Try adjusting your search or filter criteria.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Popular Sections -->
+        {% if popular_sections %}
+        <div style="border-top:1px solid rgba(var(--navy-rgb),0.06); padding-top:var(--space-12);">
+            <h2 style="font-size:1.75rem; margin-bottom:var(--space-6);">Popular Sections</h2>
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-4);">
+                {% for section in popular_sections %}
+                <a href="{{ url_for('main.view_section', section_id=section.id) }}" class="card"
+                    style="text-decoration:none; border:2px solid rgba(var(--navy-rgb),0.04);">
+                    <div class="card-body"
+                        style="padding:var(--space-4); display:flex; align-items:flex-start; gap:var(--space-3);">
+                        <span class="badge badge-green"
+                            style="font-weight:700; font-size:0.75rem; white-space:nowrap;">{{ section.section_number
+                            }}</span>
+                        <div>
+                            <div
+                                style="font-weight:700; color:var(--navy); font-size:0.875rem; margin-bottom:var(--space-1);">
+                                {{ section.title }}</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted);">{{ section.act.short_name }}</div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Live Search JavaScript -->
+<script>
+    let searchTimeout;
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            if (query.length < 2) { searchResults.style.display = 'none'; return; }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/search-laws?q=${encodeURIComponent(query)}`)
+                    .then(r => r.json())
+                    .then(data => displaySearchResults(data))
+                    .catch(e => console.error('Search error:', e));
+            }, 300);
+        });
+    }
+
+    function displaySearchResults(data) {
+        if (data.acts.length === 0 && data.sections.length === 0) {
+            searchResults.style.display = 'none'; return;
+        }
+        let html = '<div style="padding:var(--space-4);">';
+        if (data.acts.length > 0) {
+            html += '<div style="margin-bottom:var(--space-4);"><h3 style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:var(--space-2);">Acts</h3>';
+            data.acts.forEach(act => {
+                html += `<a href="${act.url}" style="display:block; padding:var(--space-3); border-radius:var(--radius-md); transition:background 150ms;" onmouseover="this.style.background='var(--paper)'" onmouseout="this.style.background='transparent'">
+                    <div style="font-weight:700; color:var(--navy);">${act.short_name} (${act.year})</div>
+                    <div style="font-size:0.875rem; color:var(--text-secondary);">${act.name}</div>
+                    <span class="badge badge-navy" style="margin-top:var(--space-1);">${act.category}</span>
+                </a>`;
+            });
+            html += '</div>';
+        }
+        if (data.sections.length > 0) {
+            html += '<div><h3 style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:var(--space-2);">Sections</h3>';
+            data.sections.forEach(section => {
+                html += `<a href="${section.url}" style="display:block; padding:var(--space-3); border-radius:var(--radius-md); transition:background 150ms;" onmouseover="this.style.background='var(--paper)'" onmouseout="this.style.background='transparent'">
+                    <div style="display:flex; align-items:flex-start; gap:var(--space-2);">
+                        <span class="badge badge-green" style="font-weight:700;">${section.section_number}</span>
+                        <div>
+                            <div style="font-weight:600; color:var(--navy); font-size:0.875rem;">${section.title}</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted);">${section.act_name}</div>
+                        </div>
+                    </div>
+                </a>`;
+            });
+            html += '</div>';
+        }
+        html += '</div>';
+        searchResults.innerHTML = html;
+        searchResults.style.display = 'block';
+    }
+
+    document.addEventListener('click', function (e) {
+        if (searchInput && !searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.style.display = 'none';
+        }
+    });
+</script>
+
+<style>
+    @media (max-width: 1024px) {
+        div[style*="grid-template-columns:repeat(3"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+
+    @media (max-width: 640px) {
+
+        div[style*="grid-template-columns:repeat(3"],
+        div[style*="grid-template-columns:repeat(2"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    #searchInput::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+</style>
+{% endblock %}

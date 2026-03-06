@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Lawyers — LegalConnect{% endblock %}
+
+{% block content %}
+<div style="max-width:1200px; margin:0 auto; padding:var(--space-12) var(--space-6);">
+    <!-- Header -->
+    <div style="margin-bottom:var(--space-8);" class="animate-fade-up">
+        <h1 style="font-size:2rem; margin-bottom:var(--space-2);">Browse Lawyers</h1>
+        <p style="color:var(--text-secondary);">Find the right legal expert for your needs</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="card animate-fade-up animate-fade-up-delay-1"
+        style="margin-bottom:var(--space-8); border-radius:var(--radius-xl);">
+        <div class="card-body" style="padding:var(--space-6);">
+            <form method="GET" action="{{ url_for('customer.browse_lawyers') }}"
+                style="display:grid; grid-template-columns:repeat(4, 1fr); gap:var(--space-4); align-items:end;">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Specialization</label>
+                    <select name="specialization" class="form-input form-select" aria-label="Filter by specialization">
+                        <option value="">All Specializations</option>
+                        <option value="Civil Law" {% if specialization=='Civil Law' %}selected{% endif %}>Civil Law
+                        </option>
+                        <option value="Criminal Law" {% if specialization=='Criminal Law' %}selected{% endif %}>Criminal
+                            Law</option>
+                        <option value="Corporate Law" {% if specialization=='Corporate Law' %}selected{% endif %}>
+                            Corporate Law</option>
+                        <option value="Family Law" {% if specialization=='Family Law' %}selected{% endif %}>Family Law
+                        </option>
+                        <option value="Property Law" {% if specialization=='Property Law' %}selected{% endif %}>Property
+                            Law</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Min Experience (years)</label>
+                    <input type="number" name="min_experience" min="0" class="form-input" placeholder="0"
+                        aria-label="Minimum years of experience">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Max Fee (₹)</label>
+                    <input type="number" name="max_fee" min="0" class="form-input" placeholder="Any"
+                        aria-label="Maximum consultation fee">
+                </div>
+                <button type="submit" class="btn btn-primary" style="height:fit-content;"
+                    aria-label="Apply filters">Apply Filters</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lawyers Grid -->
+    {% if lawyers %}
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-6);"
+        class="animate-fade-up animate-fade-up-delay-2">
+        {% for user, profile in lawyers %}
+        <div class="card card-accent" style="border-radius:var(--radius-lg);">
+            <div class="card-body" style="padding:var(--space-6);">
+                <div
+                    style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:var(--space-4);">
+                    <div>
+                        <h3
+                            style="font-family:var(--font-serif); font-weight:700; font-size:1.125rem; color:var(--navy); margin-bottom:var(--space-1);">
+                            {{ user.full_name }}</h3>
+                        <span class="badge badge-green">✓ Verified</span>
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:var(--space-2); margin-bottom:var(--space-4);">
+                    <p style="font-size:0.875rem; color:var(--text-secondary);"><strong>Experience:</strong> {{
+                        profile.experience_years }} years</p>
+                    <p style="font-size:0.875rem; color:var(--text-secondary);"><strong>Fee:</strong> ₹{{
+                        profile.consultation_fee }}</p>
+                    <div>
+                        <p
+                            style="font-size:0.875rem; color:var(--text-secondary); font-weight:600; margin-bottom:var(--space-1);">
+                            Specializations:</p>
+                        {% set specs = profile.specializations|from_json %}
+                        {% for spec in specs[:3] %}
+                        <span class="badge badge-navy"
+                            style="margin-right:var(--space-1); margin-bottom:var(--space-1);">{{ spec }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if profile.bio %}
+                <p
+                    style="font-size:0.875rem; color:var(--text-secondary); margin-bottom:var(--space-4); line-height:1.6;">
+                    {{ profile.bio[:100] }}...</p>
+                {% endif %}
+
+                <a href="{{ url_for('customer.book_consultation', lawyer_id=user.id) }}" class="btn btn-primary"
+                    style="width:100%;" aria-label="Book consultation with {{ user.full_name }}">
+                    Book Consultation
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" style="padding:var(--space-12); text-align:center;">
+        <p style="color:var(--text-secondary); font-size:1.0625rem; margin-bottom:var(--space-4);">No lawyers found
+            matching your criteria</p>
+        <a href="{{ url_for('customer.browse_lawyers') }}" style="color:var(--navy); font-weight:600;">Clear filters</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    @media (max-width: 1024px) {
+        div[style*="grid-template-columns:repeat(3"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        form[style*="grid-template-columns:repeat(4"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+
+    @media (max-width: 640px) {
+
+        div[style*="grid-template-columns:repeat(3"],
+        div[style*="grid-template-columns:repeat(2"] {
+            grid-template-columns: 1fr !important;
+        }
+
+        form[style*="grid-template-columns:repeat(4"],
+        form[style*="grid-template-columns:repeat(2"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

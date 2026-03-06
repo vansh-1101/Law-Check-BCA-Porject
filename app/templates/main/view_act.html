@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}{{ act.short_name }} — LegalConnect{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div style="background:var(--paper); padding:var(--space-4) 0; border-bottom:1px solid rgba(var(--navy-rgb),0.06);">
+    <div class="container">
+        <nav style="display:flex; align-items:center; gap:var(--space-2); font-size:0.875rem;" aria-label="Breadcrumb">
+            <a href="{{ url_for('main.index') }}" style="color:var(--text-secondary);">Home</a>
+            <span style="color:var(--text-muted);">→</span>
+            <a href="{{ url_for('main.browse_laws') }}" style="color:var(--text-secondary);">Browse Laws</a>
+            <span style="color:var(--text-muted);">→</span>
+            <span style="color:var(--navy); font-weight:600;">{{ act.short_name }}</span>
+        </nav>
+    </div>
+</div>
+
+<!-- Act Header -->
+<section style="background:linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); padding:var(--space-12) 0;">
+    <div class="container">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between;">
+            <div style="flex:1;" class="animate-fade-up">
+                <span
+                    class="badge {% if act.category == 'Criminal' %}badge-red{% elif act.category == 'Civil' %}badge-navy{% elif act.category == 'Constitutional' %}badge-green{% else %}badge-navy{% endif %}"
+                    style="margin-bottom:var(--space-4); display:inline-block; background:rgba(255,255,255,0.15); color:var(--text-inverse);">{{
+                    act.category }} Law</span>
+                <h1 style="color:var(--text-inverse); font-size:2.5rem; margin-bottom:var(--space-3);">{{ act.name }}
+                </h1>
+                <p style="color:rgba(255,255,255,0.6); font-size:1.125rem; margin-bottom:var(--space-4);">{{
+                    act.short_name }}, {{ act.year }}</p>
+                <p style="color:rgba(255,255,255,0.5); font-size:1.0625rem; max-width:600px; line-height:1.7;">{{
+                    act.description }}</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); backdrop-filter:blur(12px); border-radius:var(--radius-lg); padding:var(--space-4) var(--space-6); margin-left:var(--space-6); text-align:center;"
+                class="animate-fade-up animate-fade-up-delay-1">
+                <div
+                    style="font-size:2.5rem; font-weight:700; color:var(--text-inverse); font-family:var(--font-serif);">
+                    {{ sections|length }}</div>
+                <div style="font-size:0.875rem; color:rgba(255,255,255,0.5);">Sections</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section style="padding:var(--space-12) 0; background:var(--white);">
+    <div class="container">
+        <div style="display:grid; grid-template-columns:3fr 1fr; gap:var(--space-8);">
+            <!-- Main Content Area -->
+            <div>
+                <!-- Search Within Act -->
+                <div style="margin-bottom:var(--space-8);">
+                    <form action="{{ url_for('main.view_act', act_id=act.id) }}" method="get"
+                        style="display:flex; gap:var(--space-2);">
+                        <input type="text" name="q" value="{{ search_query }}" placeholder="Search within this act..."
+                            class="form-input" style="flex:1;" aria-label="Search within act">
+                        <button type="submit" class="btn btn-accent" aria-label="Search">Search</button>
+                    </form>
+                </div>
+
+                <!-- Sections List -->
+                <div>
+                    <h2 style="font-size:1.5rem; margin-bottom:var(--space-6);">
+                        Sections
+                        {% if search_query %}<span style="font-size:1rem; color:var(--text-muted); font-weight:400;">({{
+                            sections|length }} results for "{{ search_query }}")</span>{% endif %}
+                    </h2>
+
+                    {% if sections %}
+                    <div style="display:flex; flex-direction:column; gap:var(--space-4);">
+                        {% for section in sections %}
+                        <div class="card" style="border:2px solid rgba(var(--navy-rgb),0.06); transform:none;">
+                            <button type="button" onclick="toggleSection({{ section.id }})"
+                                style="width:100%; padding:var(--space-4) var(--space-6); background:var(--paper); border:none; cursor:pointer; text-align:left; display:flex; align-items:center; justify-content:space-between; border-radius:var(--radius-lg) var(--radius-lg) 0 0; transition:background var(--transition-fast);"
+                                onmouseover="this.style.background='var(--paper-dark)'"
+                                onmouseout="this.style.background='var(--paper)'"
+                                aria-label="Toggle section {{ section.section_number }}">
+                                <div style="display:flex; align-items:center; gap:var(--space-3);">
+                                    <span class="badge badge-green" style="font-weight:700;">{{ section.section_number
+                                        }}</span>
+                                    <div>
+                                        <h3
+                                            style="font-family:var(--font-sans); font-weight:700; font-size:0.9375rem; color:var(--navy); margin:0;">
+                                            {{ section.title }}</h3>
+                                        {% if section.keywords %}
+                                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
+                                            Keywords: {{ section.keywords }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <span id="icon-{{ section.id }}"
+                                    style="color:var(--text-muted); transition:transform var(--transition-fast); font-size:0.875rem;">▼</span>
+                            </button>
+                            <div id="section-{{ section.id }}"
+                                style="display:none; padding:var(--space-4) var(--space-6); border-top:1px solid rgba(var(--navy-rgb),0.06);">
+                                <p style="color:var(--text-secondary); line-height:1.7; margin-bottom:var(--space-4);">
+                                    {{ section.description }}</p>
+                                <a href="{{ url_for('main.view_section', section_id=section.id) }}"
+                                    style="color:var(--emerald); font-weight:600; font-size:0.875rem;">View Full Details
+                                    →</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div
+                        style="text-align:center; padding:var(--space-12) 0; background:var(--paper); border-radius:var(--radius-lg);">
+                        <div style="font-size:3rem; margin-bottom:var(--space-4);" aria-hidden="true">🔍</div>
+                        <h3 style="font-size:1.375rem; margin-bottom:var(--space-2);">No sections found</h3>
+                        <p style="color:var(--text-muted);">Try adjusting your search query.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div>
+                <div
+                    style="position:sticky; top:calc(var(--space-20) + 10px); display:flex; flex-direction:column; gap:var(--space-6);">
+                    <div class="card" style="border-radius:var(--radius-lg);">
+                        <div class="card-body" style="padding:var(--space-6);">
+                            <h3
+                                style="font-family:var(--font-sans); font-weight:700; font-size:1rem; margin-bottom:var(--space-4);">
+                                Quick Actions</h3>
+                            <a href="{{ url_for('main.browse_laws') }}" class="btn btn-outline btn-sm"
+                                style="width:100%; text-align:center;" aria-label="Back to browse">← Back to Browse</a>
+                        </div>
+                    </div>
+
+                    {% if related_acts %}
+                    <div class="card" style="border-radius:var(--radius-lg);">
+                        <div class="card-body" style="padding:var(--space-6);">
+                            <h3
+                                style="font-family:var(--font-sans); font-weight:700; font-size:1rem; margin-bottom:var(--space-4);">
+                                Related Acts</h3>
+                            <div style="display:flex; flex-direction:column; gap:var(--space-3);">
+                                {% for related in related_acts %}
+                                <a href="{{ url_for('main.view_act', act_id=related.id) }}" class="card"
+                                    style="text-decoration:none; border:2px solid rgba(var(--navy-rgb),0.04); transform:none;">
+                                    <div class="card-body" style="padding:var(--space-3);">
+                                        <div style="font-weight:600; font-size:0.875rem; color:var(--navy);">{{
+                                            related.short_name }}</div>
+                                        <div style="font-size:0.75rem; color:var(--text-muted);">{{ related.year }}
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function toggleSection(sectionId) {
+        const content = document.getElementById(`section-${sectionId}`);
+        const icon = document.getElementById(`icon-${sectionId}`);
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            content.style.display = 'none';
+            icon.style.transform = 'rotate(0deg)';
+        }
+    }
+</script>
+
+<style>
+    @media (max-width: 768px) {
+        div[style*="grid-template-columns:3fr 1fr"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

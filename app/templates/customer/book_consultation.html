@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Book Consultation — LegalConnect{% endblock %}
+
+{% block content %}
+<div style="max-width:720px; margin:0 auto; padding:var(--space-12) var(--space-6);">
+    <div class="card animate-fade-up" style="border-radius:var(--radius-xl); box-shadow:var(--shadow-xl);">
+        <div class="card-body" style="padding:var(--space-8);">
+
+            <!-- Lawyer Info Header -->
+            <div
+                style="margin-bottom:var(--space-8); padding-bottom:var(--space-6); border-bottom:1px solid rgba(var(--navy-rgb),0.06);">
+                <h1 style="font-size:1.75rem; margin-bottom:var(--space-2);">Book Consultation</h1>
+                <p style="font-size:1.0625rem; color:var(--text-secondary);">with <strong style="color:var(--navy);">{{
+                        lawyer.full_name }}</strong></p>
+                {% if lawyer_profile %}
+                <div style="display:flex; flex-wrap:wrap; gap:var(--space-3); margin-top:var(--space-3);">
+                    <span class="badge badge-navy">⚖️ {{ lawyer_profile.experience_years }} years experience</span>
+                    <span class="badge badge-gold">💰 ₹{{ lawyer_profile.consultation_fee }}</span>
+                    {% if specializations %}
+                    {% for spec in specializations %}
+                    <span class="badge badge-green">{{ spec }}</span>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            {% if error %}
+            <div class="flash-msg flash-danger" style="margin-bottom:var(--space-6);">{{ error }}</div>
+            {% endif %}
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash-msg flash-{{ category }}" style="margin-bottom:var(--space-4);">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <!-- Booking Form -->
+            <form method="POST" action="{{ url_for('customer.book_consultation', lawyer_id=lawyer.id) }}">
+
+                <!-- Consultation Date & Time -->
+                <div class="form-group">
+                    <label for="consultation_date" class="form-label">📅 Consultation Date & Time <span
+                            class="required">*</span></label>
+                    <input type="datetime-local" id="consultation_date" name="consultation_date" required
+                        min="{{ min_date }}" value="{{ consultation_date or '' }}" class="form-input"
+                        aria-label="Select consultation date and time">
+                    <p class="form-hint">Select a future date and time for your consultation</p>
+                    {% if errors and errors.consultation_date %}
+                    <p class="form-error">{{ errors.consultation_date }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Category -->
+                <div class="form-group">
+                    <label for="category" class="form-label">📂 Category <span class="required">*</span></label>
+                    <select id="category" name="category" required class="form-input form-select"
+                        aria-label="Select legal category">
+                        <option value="" disabled {% if not category %}selected{% endif %}>-- Select a category --
+                        </option>
+                        <option value="civil" {% if category=='civil' %}selected{% endif %}>Civil Law</option>
+                        <option value="criminal" {% if category=='criminal' %}selected{% endif %}>Criminal Law</option>
+                        <option value="corporate" {% if category=='corporate' %}selected{% endif %}>Corporate Law
+                        </option>
+                        <option value="family" {% if category=='family' %}selected{% endif %}>Family Law</option>
+                        <option value="property" {% if category=='property' %}selected{% endif %}>Property Law</option>
+                        <option value="labor" {% if category=='labor' %}selected{% endif %}>Labor Law</option>
+                        <option value="cyber" {% if category=='cyber' %}selected{% endif %}>Cyber Law</option>
+                        <option value="constitutional" {% if category=='constitutional' %}selected{% endif %}>
+                            Constitutional Law</option>
+                        <option value="tax" {% if category=='tax' %}selected{% endif %}>Tax Law</option>
+                        <option value="consumer" {% if category=='consumer' %}selected{% endif %}>Consumer Law</option>
+                        <option value="ip" {% if category=='ip' %}selected{% endif %}>Intellectual Property</option>
+                        <option value="other" {% if category=='other' %}selected{% endif %}>Other</option>
+                    </select>
+                    {% if errors and errors.category %}
+                    <p class="form-error">{{ errors.category }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Issue Description -->
+                <div class="form-group">
+                    <label for="issue_description" class="form-label">📝 Describe Your Issue <span
+                            class="required">*</span></label>
+                    <textarea id="issue_description" name="issue_description" required rows="6" minlength="20"
+                        maxlength="1000"
+                        placeholder="Please describe your legal issue in detail. Include what happened, when it happened, and what outcome you are seeking..."
+                        class="form-input" style="resize:vertical; min-height:140px;"
+                        aria-label="Describe your legal issue">{{ issue_description or '' }}</textarea>
+                    <div style="display:flex; justify-content:space-between; margin-top:var(--space-1);">
+                        <p class="form-hint">Minimum 20 characters</p>
+                        <p class="form-hint" id="charCount">0 / 1000</p>
+                    </div>
+                    {% if errors and errors.issue_description %}
+                    <p class="form-error">{{ errors.issue_description }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Submit Buttons -->
+                <div style="display:flex; gap:var(--space-4); padding-top:var(--space-4);">
+                    <button type="submit" class="btn btn-primary" style="flex:1; padding:var(--space-4);"
+                        aria-label="Book consultation">
+                        ✅ Book Consultation
+                    </button>
+                    <a href="{{ url_for('customer.browse_lawyers') }}" class="btn btn-ghost"
+                        style="flex:1; padding:var(--space-4); text-align:center;" aria-label="Cancel">
+                        ← Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    var desc = document.getElementById('issue_description');
+    var counter = document.getElementById('charCount');
+    function updateCount() { counter.textContent = desc.value.length + ' / 1000'; }
+    desc.addEventListener('input', updateCount);
+    updateCount();
+</script>
+{% endblock %}

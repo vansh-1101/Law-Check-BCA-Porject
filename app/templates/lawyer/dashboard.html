@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Lawyer Dashboard — LegalConnect{% endblock %}
+
+{% block content %}
+<div style="max-width:1200px; margin:0 auto; padding:var(--space-12) var(--space-6);">
+    <!-- Header -->
+    <div style="margin-bottom:var(--space-8);" class="animate-fade-up">
+        <h1 style="font-size:2rem; margin-bottom:var(--space-2);">Lawyer Dashboard</h1>
+        <p style="color:var(--text-secondary);">Manage your consultations and profile</p>
+    </div>
+
+    <!-- Profile Status Alert -->
+    {% if not profile %}
+    <div class="flash-msg flash-warning" style="margin-bottom:var(--space-8);">
+        ⚠️ Please complete your profile to start receiving consultations.
+        <a href="{{ url_for('lawyer.setup_profile') }}"
+            style="color:inherit; text-decoration:underline; font-weight:700; margin-left:var(--space-2);">Setup Profile
+            →</a>
+    </div>
+    {% elif profile.verification_status == 'pending' %}
+    <div class="flash-msg flash-info" style="margin-bottom:var(--space-8);">
+        ⏳ Your profile is pending admin verification
+    </div>
+    {% elif profile.verification_status == 'rejected' %}
+    <div class="flash-msg flash-danger" style="margin-bottom:var(--space-8);">
+        ❌ Your profile verification was rejected. Please update your credentials.
+        <a href="{{ url_for('lawyer.setup_profile') }}"
+            style="color:inherit; text-decoration:underline; font-weight:700; margin-left:var(--space-2);">Update
+            Profile →</a>
+    </div>
+    {% endif %}
+
+    <!-- Stats Cards -->
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-6); margin-bottom:var(--space-8);"
+        class="animate-fade-up animate-fade-up-delay-1">
+        <div class="kpi-card">
+            <div class="kpi-label">Total Consultations</div>
+            <div class="kpi-value navy">{{ total_consultations }}</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Pending Requests</div>
+            <div class="kpi-value gold">{{ pending_consultations }}</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Completed</div>
+            <div class="kpi-value green">{{ completed_consultations }}</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="margin-bottom:var(--space-8);" class="animate-fade-up animate-fade-up-delay-2">
+        <a href="{{ url_for('lawyer.setup_profile') }}" class="btn btn-primary" aria-label="Edit profile">
+            {% if profile %}Edit Profile{% else %}Setup Profile{% endif %}
+        </a>
+    </div>
+
+    <!-- Consultations List -->
+    <div class="admin-panel animate-fade-up animate-fade-up-delay-3">
+        <div class="admin-panel-header">
+            <h2 style="font-size:1.375rem;">Consultation Requests</h2>
+        </div>
+        <div class="admin-panel-body">
+            {% if consultations %}
+            <div style="display:flex; flex-direction:column; gap:var(--space-4);">
+                {% for consultation in consultations %}
+                <div class="card" style="transform:none;">
+                    <div class="card-body" style="padding:var(--space-4);">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--space-2);">
+                            <div>
+                                <h3
+                                    style="font-family:var(--font-sans); font-weight:700; font-size:1.0625rem; color:var(--navy); margin-bottom:var(--space-1);">
+                                    {{ consultation.customer.full_name }}</h3>
+                                <p style="font-size:0.8125rem; color:var(--text-muted);">{{
+                                    consultation.consultation_date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                            </div>
+                            <span class="badge
+                                {% if consultation.status == 'pending' %}badge-gold
+                                {% elif consultation.status == 'confirmed' %}badge-navy
+                                {% elif consultation.status == 'completed' %}badge-green
+                                {% else %}badge-red{% endif %}">
+                                {{ consultation.status.title() }}
+                            </span>
+                        </div>
+                        <p style="font-size:0.8125rem; color:var(--text-secondary); margin-bottom:var(--space-1);">
+                            <strong>Category:</strong> {{ consultation.category.replace('_', ' ').title() }}</p>
+                        <p style="color:var(--text-secondary); margin-bottom:var(--space-3); font-size:0.9375rem;">{{
+                            consultation.issue_description[:150] }}...</p>
+                        <div style="display:flex; gap:var(--space-3);">
+                            <a href="{{ url_for('lawyer.view_consultation', consultation_id=consultation.id) }}"
+                                style="color:var(--navy); font-weight:600; font-size:0.875rem;">View Details →</a>
+                            {% if consultation.status == 'pending' %}
+                            <a href="{{ url_for('lawyer.update_consultation_status', consultation_id=consultation.id, status='confirmed') }}"
+                                style="color:var(--emerald); font-weight:600; font-size:0.875rem;">Confirm</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align:center; padding:var(--space-12) 0;">
+                <p style="color:var(--text-secondary); margin-bottom:var(--space-4);">No consultation requests yet</p>
+                {% if not profile or profile.verification_status != 'verified' %}
+                <p style="font-size:0.875rem; color:var(--text-muted);">Complete and verify your profile to start
+                    receiving requests</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        div[style*="grid-template-columns:repeat(3"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

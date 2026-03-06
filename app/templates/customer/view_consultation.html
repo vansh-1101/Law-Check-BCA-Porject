@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Consultation — LegalConnect{% endblock %}
+
+{% block content %}
+<div style="max-width:1100px; margin:0 auto; padding:var(--space-12) var(--space-6);">
+    <div style="display:grid; grid-template-columns:1fr 2fr; gap:var(--space-6);">
+        <!-- Consultation Details -->
+        <div>
+            <div class="card animate-fade-up"
+                style="border-radius:var(--radius-xl); position:sticky; top:calc(var(--space-20) + 10px);">
+                <div class="card-body" style="padding:var(--space-6);">
+                    <h2 style="font-size:1.25rem; margin-bottom:var(--space-5);">Consultation Details</h2>
+                    <div style="display:flex; flex-direction:column; gap:var(--space-4);">
+                        <div>
+                            <p style="font-size:0.8125rem; color:var(--text-muted);">Lawyer</p>
+                            <p style="font-weight:700; color:var(--navy);">{{ consultation.lawyer.full_name }}</p>
+                        </div>
+                        <div>
+                            <p style="font-size:0.8125rem; color:var(--text-muted);">Date & Time</p>
+                            <p style="font-size:0.875rem;">{{ consultation.consultation_date.strftime('%B %d, %Y at
+                                %I:%M %p') }}</p>
+                        </div>
+                        <div>
+                            <p style="font-size:0.8125rem; color:var(--text-muted);">Category</p>
+                            <p style="font-weight:500;">{{ consultation.category.replace('_', ' ').title() }}</p>
+                        </div>
+                        <div>
+                            <p style="font-size:0.8125rem; color:var(--text-muted); margin-bottom:var(--space-1);">
+                                Status</p>
+                            <span class="badge
+                                {% if consultation.status == 'pending' %}badge-gold
+                                {% elif consultation.status == 'confirmed' %}badge-navy
+                                {% elif consultation.status == 'completed' %}badge-green
+                                {% else %}badge-red{% endif %}">
+                                {{ consultation.status.title() }}
+                            </span>
+                        </div>
+                        <div>
+                            <p style="font-size:0.8125rem; color:var(--text-muted); margin-bottom:var(--space-2);">Issue
+                                Description</p>
+                            <p
+                                style="font-size:0.875rem; background:var(--paper); padding:var(--space-3); border-radius:var(--radius-md); line-height:1.6;">
+                                {{ consultation.issue_description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div>
+            <div class="admin-panel animate-fade-up animate-fade-up-delay-1" style="border-radius:var(--radius-xl);">
+                <div class="admin-panel-header">
+                    <h2 style="font-size:1.375rem;">Messages</h2>
+                </div>
+                <div
+                    style="padding:var(--space-6); display:flex; flex-direction:column; gap:var(--space-4); max-height:420px; overflow-y:auto;">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div
+                        style="display:flex; {% if message.sender_id == current_user.id %}justify-content:flex-end{% else %}justify-content:flex-start{% endif %};">
+                        <div style="max-width:400px;">
+                            <div
+                                style="{% if message.sender_id == current_user.id %}background:var(--navy); color:var(--text-inverse);{% else %}background:var(--paper); color:var(--text-primary);{% endif %} border-radius:var(--radius-lg); padding:var(--space-4);">
+                                <p style="font-size:0.9375rem; margin-bottom:var(--space-1);">{{ message.message }}</p>
+                                <p
+                                    style="font-size:0.75rem; {% if message.sender_id == current_user.id %}color:rgba(255,255,255,0.5);{% else %}color:var(--text-muted);{% endif %}">
+                                    {{ message.created_at.strftime('%I:%M %p') }}
+                                </p>
+                            </div>
+                            <p
+                                style="font-size:0.6875rem; color:var(--text-muted); margin-top:var(--space-1); {% if message.sender_id == current_user.id %}text-align:right;{% endif %}">
+                                {% if message.sender_id == current_user.id %}You{% else %}{{
+                                consultation.lawyer.full_name }}{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div style="text-align:center; padding:var(--space-8) 0;">
+                        <p style="color:var(--text-secondary);">No messages yet. Start the conversation!</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Message Form -->
+                <div style="padding:var(--space-6); border-top:1px solid rgba(var(--navy-rgb),0.06);">
+                    <form method="POST" action="{{ url_for('customer.send_message', consultation_id=consultation.id) }}"
+                        style="display:flex; gap:var(--space-4);">
+                        <textarea name="message" rows="2" required maxlength="1000" placeholder="Type your message..."
+                            class="form-input" style="flex:1; resize:none;" aria-label="Type your message"></textarea>
+                        <button type="submit" class="btn btn-primary" style="align-self:flex-end;"
+                            aria-label="Send message">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        div[style*="grid-template-columns:1fr 2fr"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width:1000px; margin:0 auto; padding:var(--space-12) var(--space-6);">
+    <div style="margin-bottom:var(--space-8);" class="animate-fade-up">
+        <h1 style="font-size:2rem; margin-bottom:var(--space-2);">Pending Lawyer Verifications</h1>
+        <p style="color:var(--text-secondary);">Review and verify lawyer credentials</p>
+    </div>
+
+    <div class="admin-panel animate-fade-up animate-fade-up-delay-1">
+        <div class="admin-panel-body">
+            {% if lawyers %}
+            <div style="display:flex; flex-direction:column; gap:var(--space-6);">
+                {% for user, profile in lawyers %}
+                <div class="card" style="transform:none; border:2px solid rgba(var(--navy-rgb),0.06);">
+                    <div class="card-body" style="padding:var(--space-6);">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--space-4);">
+                            <div>
+                                <h3
+                                    style="font-family:var(--font-serif); font-weight:700; font-size:1.375rem; color:var(--navy); margin-bottom:var(--space-1);">
+                                    {{ user.full_name }}</h3>
+                                <p style="font-size:0.875rem; color:var(--text-secondary);">{{ user.email }}</p>
+                                <p style="font-size:0.875rem; color:var(--text-secondary);">{{ user.phone }}</p>
+                            </div>
+                            <span class="badge badge-gold">Pending</span>
+                        </div>
+
+                        <div
+                            style="display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--space-4); margin-bottom:var(--space-4);">
+                            <div>
+                                <p style="font-size:0.8125rem; color:var(--text-muted); margin-bottom:2px;">Bar Council
+                                    ID</p>
+                                <p style="font-weight:600;">{{ profile.bar_council_id }}</p>
+                            </div>
+                            <div>
+                                <p style="font-size:0.8125rem; color:var(--text-muted); margin-bottom:2px;">Experience
+                                </p>
+                                <p>{{ profile.experience_years }} years</p>
+                            </div>
+                            <div>
+                                <p style="font-size:0.8125rem; color:var(--text-muted); margin-bottom:2px;">Consultation
+                                    Fee</p>
+                                <p>₹{{ profile.consultation_fee }}</p>
+                            </div>
+                            <div>
+                                <p style="font-size:0.8125rem; color:var(--text-muted); margin-bottom:2px;">
+                                    Specializations</p>
+                                <p>{{ profile.specializations|from_json|join(', ') if profile.specializations else 'N/A'
+                                    }}</p>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:var(--space-4);">
+                            <p style="font-size:0.8125rem; color:var(--text-muted); margin-bottom:2px;">Education</p>
+                            <p style="color:var(--text-secondary);">{{ profile.education }}</p>
+                        </div>
+
+                        {% if profile.bio %}
+                        <div style="margin-bottom:var(--space-4);">
+                            <p style="font-size:0.8125rem; color:var(--text-muted); margin-bottom:2px;">Bio</p>
+                            <p style="color:var(--text-secondary);">{{ profile.bio }}</p>
+                        </div>
+                        {% endif %}
+
+                        <div
+                            style="display:flex; gap:var(--space-4); padding-top:var(--space-4); border-top:1px solid rgba(var(--navy-rgb),0.06);">
+                            <a href="{{ url_for('admin.verify_lawyer', lawyer_id=user.id) }}" class="btn btn-accent"
+                                style="flex:1; text-align:center;"
+                                onclick="return confirm('Are you sure you want to verify this lawyer?')"
+                                aria-label="Verify {{ user.full_name }}">✓ Verify Lawyer</a>
+                            <a href="{{ url_for('admin.reject_lawyer', lawyer_id=user.id) }}" class="btn btn-danger"
+                                style="flex:1; text-align:center;"
+                                onclick="return confirm('Are you sure you want to reject this lawyer?')"
+                                aria-label="Reject {{ user.full_name }}">✗ Reject</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align:center; padding:var(--space-12) 0;">
+                <p style="color:var(--text-secondary); font-size:1.0625rem; margin-bottom:var(--space-4);">No pending
+                    verifications</p>
+                <a href="{{ url_for('admin.dashboard') }}" style="color:var(--navy); font-weight:600;">← Back to
+                    Dashboard</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

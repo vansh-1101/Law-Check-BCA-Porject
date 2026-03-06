@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="LegalConnect India — Connect with verified legal professionals across India. Get expert legal advice for civil, criminal, corporate, and family matters.">
+    <title>{% block title %}LegalConnect — Legal Consultation Platform{% endblock %}</title>
+
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
+
+    <!-- Tailwind CSS CDN (utilities fallback) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'navy': '#0B1F3A',
+                        'navy-light': '#132D54',
+                        'emerald-a': '#16A34A',
+                        'gold-a': '#D97706',
+                        'paper': '#F8F9FB',
+                    },
+                    fontFamily: {
+                        'serif': ['Playfair Display', 'serif'],
+                        'sans': ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="lc-navbar" id="mainNav" role="navigation" aria-label="Main navigation">
+        <div class="nav-inner">
+            <!-- Logo -->
+            <a href="{{ url_for('main.index') }}" class="logo" aria-label="LegalConnect Home">
+                <span class="logo-icon" aria-hidden="true">⚖️</span>
+                LegalConnect
+            </a>
+
+            <!-- Hamburger (mobile) -->
+            <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+
+            <!-- Links + Actions -->
+            <div class="nav-links" id="navLinks">
+                {% if current_user.is_authenticated %}
+                <span class="user-greeting">Welcome, {{ current_user.full_name }}</span>
+
+                {% if current_user.role == 'customer' %}
+                <a href="{{ url_for('customer.dashboard') }}" class="nav-link"
+                    aria-label="Customer Dashboard">Dashboard</a>
+                <a href="{{ url_for('customer.browse_lawyers') }}" class="nav-link" aria-label="Browse Lawyers">Browse
+                    Lawyers</a>
+                {% elif current_user.role == 'lawyer' %}
+                <a href="{{ url_for('lawyer.dashboard') }}" class="nav-link" aria-label="Lawyer Dashboard">Dashboard</a>
+                <a href="{{ url_for('lawyer.setup_profile') }}" class="nav-link" aria-label="Setup Profile">Profile</a>
+                {% elif current_user.role == 'admin' %}
+                <a href="{{ url_for('admin.dashboard') }}" class="nav-link" aria-label="Admin Dashboard">Admin Panel</a>
+                {% endif %}
+
+                <div class="nav-actions">
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-sm" aria-label="Logout">Logout</a>
+                </div>
+                {% else %}
+                <a href="{{ url_for('main.index') }}" class="nav-link" aria-label="Home">Home</a>
+                <a href="{{ url_for('main.about') }}" class="nav-link" aria-label="About Us">About</a>
+                <a href="{{ url_for('main.contact') }}" class="nav-link" aria-label="Contact Us">Contact</a>
+
+                <div class="nav-actions">
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-sm"
+                        aria-label="Login to your account">Login</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm"
+                        aria-label="Create a new account">Register</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══ FLASH MESSAGES ═══ -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container" role="alert">
+        {% for category, message in messages %}
+        <div class="flash-msg flash-{{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <main id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="lc-footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-grid">
+                <!-- Brand -->
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span class="logo-icon" style="background:rgba(255,255,255,0.1);color:#22C55E;"
+                            aria-hidden="true">⚖️</span>
+                        LegalConnect India
+                    </div>
+                    <p>Connecting you with verified legal professionals across India. Expert legal guidance for every
+                        citizen.</p>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{{ url_for('main.index') }}">Home</a></li>
+                        <li><a href="{{ url_for('main.about') }}">About Us</a></li>
+                        <li><a href="{{ url_for('main.analyze_problem') }}">Law Analyzer</a></li>
+                        <li><a href="{{ url_for('main.browse_laws') }}">Browse Laws</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:support@legalconnect.in">support@legalconnect.in</a></li>
+                        <li><a href="tel:+911234567890">+91 1234567890</a></li>
+                        <li>Mumbai, Maharashtra</li>
+                    </ul>
+                </div>
+
+                <!-- Legal -->
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Disclaimer</a></li>
+                        <li><a href="{{ url_for('main.contact') }}">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom bar -->
+            <div class="footer-bottom">
+                <p>&copy; 2026 LegalConnect India. All rights reserved.</p>
+                <div class="footer-legal-links">
+                    <a href="#">Privacy</a>
+                    <a href="#">Terms</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ═══ GLOBAL SCRIPTS ═══ -->
+    <script>
+        // Sticky navbar shadow on scroll
+        const navbar = document.getElementById('mainNav');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 10);
+        }, { passive: true });
+
+        // Mobile hamburger toggle
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        if (navToggle) {
+            navToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('open');
+                navToggle.setAttribute('aria-expanded', navLinks.classList.contains('open'));
+            });
+        }
+
+        // Scroll-reveal observer
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+        // Count-up animation
+        function animateCountUp(el) {
+            const target = parseInt(el.getAttribute('data-count'), 10);
+            if (isNaN(target)) return;
+            const suffix = el.getAttribute('data-suffix') || '';
+            const duration = 1800;
+            const start = performance.now();
+
+            function update(now) {
+                const elapsed = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - elapsed, 3);
+                el.textContent = Math.floor(target * eased) + suffix;
+                if (elapsed < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+
+        const countObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCountUp(entry.target);
+                    countObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+
+        document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el));
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

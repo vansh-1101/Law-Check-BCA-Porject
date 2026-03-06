@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results — LegalConnect{% endblock %}
+
+{% block content %}
+<div style="min-height:100vh; background:var(--paper); padding:var(--space-12) 0;">
+    <div class="container" style="max-width:960px;">
+        <!-- Header -->
+        <div style="text-align:center; margin-bottom:var(--space-8);" class="animate-fade-up">
+            <h1 style="margin-bottom:var(--space-2);">Analysis Results</h1>
+            <p style="color:var(--text-secondary);">Based on your problem description</p>
+        </div>
+
+        <!-- User's Problem -->
+        <div class="card animate-fade-up animate-fade-up-delay-1"
+            style="margin-bottom:var(--space-8); border-left:4px solid var(--emerald);">
+            <div class="card-body" style="padding:var(--space-6);">
+                <h2
+                    style="font-family:var(--font-sans); font-size:1.0625rem; font-weight:700; margin-bottom:var(--space-3); display:flex; align-items:center; gap:var(--space-2);">
+                    <span aria-hidden="true">📝</span> Your Problem:
+                </h2>
+                <p style="color:var(--text-secondary); line-height:1.7;">{{ problem }}</p>
+            </div>
+        </div>
+
+        <!-- Results -->
+        {% if results %}
+        <div style="margin-bottom:var(--space-8);">
+            <h2 style="font-size:1.5rem; margin-bottom:var(--space-6);">⚖️ Applicable Laws & Sections ({{ results|length
+                }} found)</h2>
+
+            {% for result in results %}
+            <div class="card reveal"
+                style="margin-bottom:var(--space-6); border:2px solid rgba(22,163,74,0.1); border-radius:var(--radius-xl);">
+                <div class="card-body" style="padding:var(--space-6);">
+                    <!-- Section Header -->
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--space-4); flex-wrap:wrap; gap:var(--space-3);">
+                        <div style="flex:1;">
+                            <div
+                                style="display:flex; align-items:center; gap:var(--space-3); margin-bottom:var(--space-2);">
+                                <span class="badge badge-green">#{{ loop.index }}</span>
+                                <h3 style="font-size:1.375rem; margin:0;">{{ result.act.short_name }} Section {{
+                                    result.section.section_number }}</h3>
+                            </div>
+                            <p style="font-size:1.0625rem; color:var(--text-secondary); font-weight:500;">{{
+                                result.section.title }}</p>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="badge badge-green"
+                                style="font-size:0.875rem; padding:var(--space-2) var(--space-4);">
+                                {{ result.score }} keyword{{ 's' if result.score > 1 else '' }} matched
+                            </div>
+                            <div style="font-size:0.8125rem; color:var(--text-muted); margin-top:var(--space-1);">
+                                {{ "%.0f"|format(result.relevance_percentage) }}% relevance
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Matched Keywords -->
+                    <div style="margin-bottom:var(--space-4);">
+                        <p
+                            style="font-size:0.8125rem; font-weight:700; color:var(--text-muted); margin-bottom:var(--space-2);">
+                            Matched Keywords:</p>
+                        <div style="display:flex; flex-wrap:wrap; gap:var(--space-2);">
+                            {% for keyword in result.matched_keywords %}
+                            <span class="badge badge-navy">{{ keyword }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div
+                        style="background:var(--paper); padding:var(--space-4); border-radius:var(--radius-lg); margin-bottom:var(--space-4);">
+                        <h4
+                            style="font-family:var(--font-sans); font-weight:700; font-size:0.9375rem; margin-bottom:var(--space-2); display:flex; align-items:center; gap:var(--space-2);">
+                            <span aria-hidden="true">📖</span> What this law says:
+                        </h4>
+                        <p style="color:var(--text-secondary); line-height:1.7;">{{ result.section.description }}</p>
+                    </div>
+
+                    <!-- Penalty -->
+                    {% if result.section.penalty %}
+                    <div class="flash-msg flash-danger" style="margin-bottom:var(--space-4);">
+                        <strong>⚠️ Punishment/Penalty:</strong> {{ result.section.penalty }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Legal Status -->
+                    <div
+                        style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-4); margin-bottom:var(--space-4);">
+                        <div
+                            style="text-align:center; padding:var(--space-3); background:var(--paper); border-radius:var(--radius-md);">
+                            <p style="font-size:0.8125rem; color:var(--text-muted); margin-bottom:2px;">Bailable</p>
+                            <p style="font-weight:700; font-size:1.0625rem;">
+                                {% if result.section.is_bailable %}<span style="color:var(--success);">✓ Yes</span>{%
+                                else %}<span style="color:var(--error);">✗ No</span>{% endif %}
+                            </p>
+                        </div>
+                        <div
+                            style="text-align:center; padding:var(--space-3); background:var(--paper); border-radius:var(--radius-md);">
+                            <p style="font-size:0.8125rem; color:var(--text-muted); margin-bottom:2px;">Cognizable</p>
+                            <p style="font-weight:700; font-size:1.0625rem;">
+                                {% if result.section.is_cognizable %}<span style="color:var(--success);">✓ Yes</span>{%
+                                else %}<span style="color:var(--error);">✗ No</span>{% endif %}
+                            </p>
+                        </div>
+                        <div
+                            style="text-align:center; padding:var(--space-3); background:var(--paper); border-radius:var(--radius-md);">
+                            <p style="font-size:0.8125rem; color:var(--text-muted); margin-bottom:2px;">Compoundable</p>
+                            <p style="font-weight:700; font-size:1.0625rem;">
+                                {% if result.section.is_compoundable %}<span style="color:var(--success);">✓
+                                    Yes</span>{% else %}<span style="color:var(--error);">✗ No</span>{% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Legal Terms Guide -->
+                    <div
+                        style="background:rgba(22,163,74,0.04); padding:var(--space-3); border-radius:var(--radius-md); margin-bottom:var(--space-4); font-size:0.875rem; color:var(--text-secondary);">
+                        <p><strong>Bailable:</strong> Can get bail as a matter of right</p>
+                        <p><strong>Cognizable:</strong> Police can arrest without warrant</p>
+                        <p><strong>Compoundable:</strong> Can be settled out of court</p>
+                    </div>
+
+                    <!-- View buttons -->
+                    <div style="display:flex; gap:var(--space-3);">
+                        <a href="{{ url_for('main.view_section', section_id=result.section.id) }}"
+                            class="btn btn-accent btn-sm" aria-label="View full section details">View Full Section
+                            Details →</a>
+                        <a href="{{ url_for('main.view_act', act_id=result.act.id) }}" class="btn btn-ghost btn-sm"
+                            aria-label="View act">View {{ result.act.short_name }} Act</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Recommended Actions -->
+        <div class="flash-msg flash-warning"
+            style="padding:var(--space-6); border-radius:var(--radius-xl); margin-bottom:var(--space-8);">
+            <h3
+                style="font-size:1.375rem; margin-bottom:var(--space-4); display:flex; align-items:center; gap:var(--space-2);">
+                <span aria-hidden="true">💡</span> Recommended Next Steps
+            </h3>
+            <ol
+                style="list-style:decimal; padding-left:var(--space-5); display:flex; flex-direction:column; gap:var(--space-3);">
+                <li><strong>Document Everything:</strong> Collect and preserve all evidence (photos, videos, receipts,
+                    messages)</li>
+                <li><strong>File a Complaint:</strong> Visit the nearest police station to file an FIR if it's a
+                    cognizable offense</li>
+                <li><strong>Consult a Lawyer:</strong> Get personalized legal advice from a verified lawyer</li>
+                <li><strong>Keep Records:</strong> Maintain copies of all legal documents and correspondence</li>
+                <li><strong>Know Your Rights:</strong> Understand your legal rights and procedures</li>
+            </ol>
+            <div style="margin-top:var(--space-6);">
+                <a href="{{ url_for('customer.browse_lawyers') }}" class="btn btn-accent btn-lg"
+                    aria-label="Find a lawyer">🔍 Find a Lawyer Now</a>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- No Results Found -->
+        <div class="card" style="padding:var(--space-12); text-align:center; border-radius:var(--radius-xl);">
+            <div style="font-size:3rem; margin-bottom:var(--space-4);" aria-hidden="true">🔍</div>
+            <h2 style="font-size:1.5rem; margin-bottom:var(--space-4);">No Matching Laws Found</h2>
+            <p style="color:var(--text-secondary); margin-bottom:var(--space-6);">We couldn't find any laws matching
+                your problem description.</p>
+            <ul
+                style="text-align:left; max-width:480px; margin:0 auto var(--space-8); display:flex; flex-direction:column; gap:var(--space-2); color:var(--text-secondary);">
+                <li>• Your problem might be described in different terms</li>
+                <li>• It might fall under a specialized area not yet in our database</li>
+                <li>• You might need to provide more specific details</li>
+            </ul>
+            <div style="display:flex; gap:var(--space-4); justify-content:center;">
+                <a href="{{ url_for('main.analyze_problem') }}" class="btn btn-accent" aria-label="Try again">Try
+                    Again</a>
+                <a href="{{ url_for('customer.browse_lawyers') }}" class="btn btn-primary"
+                    aria-label="Consult a lawyer">Consult a Lawyer</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Disclaimer -->
+        <div
+            style="background:var(--white); border:2px solid rgba(var(--navy-rgb),0.08); border-radius:var(--radius-xl); padding:var(--space-6); margin-bottom:var(--space-8);">
+            <h4
+                style="font-family:var(--font-sans); font-weight:700; margin-bottom:var(--space-2); display:flex; align-items:center; gap:var(--space-2);">
+                <span aria-hidden="true">⚠️</span> Important Disclaimer
+            </h4>
+            <p style="font-size:0.875rem; color:var(--text-secondary); line-height:1.7;">
+                This analysis is based on keyword matching and is for informational purposes only. It does not
+                constitute legal advice. For accurate legal guidance, please consult with a qualified lawyer.
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex; gap:var(--space-4); justify-content:center;">
+            <a href="{{ url_for('main.analyze_problem') }}" class="btn btn-ghost" aria-label="Analyze another problem">←
+                Analyze Another Problem</a>
+            <a href="{{ url_for('main.browse_laws') }}" class="btn btn-primary" aria-label="Browse all laws">Browse All
+                Laws</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

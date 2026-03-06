@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width:620px; margin:0 auto; padding:var(--space-12) var(--space-6);">
+    <div class="card animate-fade-up" style="border-radius:var(--radius-xl); box-shadow:var(--shadow-xl);">
+        <div class="card-body" style="padding:var(--space-8);">
+            <h1 style="font-size:1.5rem; margin-bottom:var(--space-6);">
+                {% if act %}Edit Act: {{ act.name }}{% else %}Add New Legal Act{% endif %}
+            </h1>
+
+            <form method="POST">
+                <div class="form-group">
+                    <label for="name" class="form-label">Act Name <span class="required">*</span></label>
+                    <input type="text" id="name" name="name" required
+                        value="{{ act.name if act else request.form.get('name', '') }}"
+                        placeholder="e.g. Indian Penal Code" class="form-input" aria-label="Act name">
+                    {% if errors and errors.name %}<p class="form-error">{{ errors.name }}</p>{% endif %}
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                    <div class="form-group">
+                        <label for="short_name" class="form-label">Short Name <span class="required">*</span></label>
+                        <input type="text" id="short_name" name="short_name" required
+                            value="{{ act.short_name if act else request.form.get('short_name', '') }}"
+                            placeholder="e.g. IPC" class="form-input" aria-label="Short name">
+                        {% if errors and errors.short_name %}<p class="form-error">{{ errors.short_name }}</p>{% endif
+                        %}
+                    </div>
+                    <div class="form-group">
+                        <label for="year" class="form-label">Year <span class="required">*</span></label>
+                        <input type="number" id="year" name="year" required min="1800" max="2030"
+                            value="{{ act.year if act else request.form.get('year', '') }}" placeholder="e.g. 1860"
+                            class="form-input" aria-label="Year">
+                        {% if errors and errors.year %}<p class="form-error">{{ errors.year }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="category" class="form-label">Category <span class="required">*</span></label>
+                    <select id="category" name="category" required class="form-input form-select"
+                        aria-label="Select category">
+                        <option value="">Select category...</option>
+                        {% set current_cat = act.category if act else request.form.get('category', '') %}
+                        {% for cat in ['Criminal', 'Civil', 'Constitutional', 'Commercial', 'Family', 'Consumer',
+                        'Cyber', 'Labor', 'Environmental', 'Tax', 'Other'] %}
+                        <option value="{{ cat }}" {% if current_cat==cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if errors and errors.category %}<p class="form-error">{{ errors.category }}</p>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" name="description" rows="3" placeholder="Brief description of the act..."
+                        class="form-input" style="resize:vertical;"
+                        aria-label="Description">{{ act.description if act else request.form.get('description', '') }}</textarea>
+                </div>
+
+                <div style="display:flex; gap:var(--space-4); padding-top:var(--space-4);">
+                    <button type="submit" class="btn btn-primary" style="flex:1; padding:var(--space-4);"
+                        aria-label="Save">💾 {% if act %}Update Act{% else %}Add Act{% endif %}</button>
+                    <a href="{{ url_for('admin.manage_laws') }}" class="btn btn-ghost"
+                        style="flex:1; padding:var(--space-4); text-align:center;" aria-label="Cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

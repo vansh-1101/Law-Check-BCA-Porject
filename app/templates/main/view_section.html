@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Section {{ section.section_number }} — {{ act.short_name }} — LegalConnect{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div style="background:var(--paper); padding:var(--space-4) 0; border-bottom:1px solid rgba(var(--navy-rgb),0.06);">
+    <div class="container">
+        <nav style="display:flex; align-items:center; gap:var(--space-2); font-size:0.875rem;" aria-label="Breadcrumb">
+            <a href="{{ url_for('main.index') }}" style="color:var(--text-secondary);">Home</a>
+            <span style="color:var(--text-muted);">→</span>
+            <a href="{{ url_for('main.browse_laws') }}" style="color:var(--text-secondary);">Browse Laws</a>
+            <span style="color:var(--text-muted);">→</span>
+            <a href="{{ url_for('main.view_act', act_id=act.id) }}" style="color:var(--text-secondary);">{{
+                act.short_name }}</a>
+            <span style="color:var(--text-muted);">→</span>
+            <span style="color:var(--navy); font-weight:600;">Section {{ section.section_number }}</span>
+        </nav>
+    </div>
+</div>
+
+<!-- Section Header -->
+<section style="background:linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); padding:var(--space-16) 0;">
+    <div class="container" style="max-width:800px; text-align:center;">
+        <a href="{{ url_for('main.view_act', act_id=act.id) }}"
+            style="display:inline-block; background:rgba(255,255,255,0.12); color:var(--text-inverse); padding:var(--space-1) var(--space-4); border-radius:var(--radius-full); font-size:0.875rem; font-weight:600; margin-bottom:var(--space-4); text-decoration:none;"
+            class="animate-fade-up">
+            {{ act.short_name }}, {{ act.year }}
+        </a>
+        <div style="margin-bottom:var(--space-4);" class="animate-fade-up animate-fade-up-delay-1">
+            <span class="badge badge-green"
+                style="font-size:1.5rem; padding:var(--space-3) var(--space-6); font-weight:700;">Section {{
+                section.section_number }}</span>
+        </div>
+        <h1 style="color:var(--text-inverse); font-size:2.25rem; margin-bottom:var(--space-6);"
+            class="animate-fade-up animate-fade-up-delay-2">{{ section.title }}</h1>
+        {% if section.keywords %}
+        <div style="display:flex; flex-wrap:wrap; gap:var(--space-2); justify-content:center;"
+            class="animate-fade-up animate-fade-up-delay-3">
+            {% for keyword in section.keywords.split(',') %}
+            <span
+                style="background:rgba(255,255,255,0.08); color:var(--text-inverse); padding:var(--space-1) var(--space-3); border-radius:var(--radius-full); font-size:0.8125rem;">{{
+                keyword.strip() }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Main Content -->
+<section style="padding:var(--space-12) 0; background:var(--white);">
+    <div class="container" style="max-width:800px;">
+        <!-- Section Content -->
+        <div
+            style="background:var(--paper); border:2px solid rgba(var(--navy-rgb),0.06); border-radius:var(--radius-xl); padding:var(--space-8); margin-bottom:var(--space-8);">
+            <h2 style="font-size:1.5rem; margin-bottom:var(--space-4);">Section Text</h2>
+            <p style="color:var(--text-secondary); line-height:1.8; font-size:1.0625rem;">{{ section.description }}</p>
+        </div>
+
+        <!-- Navigation -->
+        <div
+            style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-8); padding-bottom:var(--space-8); border-bottom:1px solid rgba(var(--navy-rgb),0.06);">
+            {% if prev_section %}
+            <a href="{{ url_for('main.view_section', section_id=prev_section.id) }}"
+                style="display:flex; align-items:center; gap:var(--space-2); color:var(--emerald); font-weight:600; text-decoration:none;">
+                <span>←</span>
+                <div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">Previous Section</div>
+                    <div>Section {{ prev_section.section_number }}</div>
+                </div>
+            </a>
+            {% else %}<div></div>{% endif %}
+
+            <a href="{{ url_for('main.view_act', act_id=act.id) }}"
+                style="color:var(--navy); font-weight:600; text-decoration:none;">View Full Act</a>
+
+            {% if next_section %}
+            <a href="{{ url_for('main.view_section', section_id=next_section.id) }}"
+                style="display:flex; align-items:center; gap:var(--space-2); color:var(--emerald); font-weight:600; text-decoration:none;">
+                <div style="text-align:right;">
+                    <div style="font-size:0.75rem; color:var(--text-muted);">Next Section</div>
+                    <div>Section {{ next_section.section_number }}</div>
+                </div>
+                <span>→</span>
+            </a>
+            {% else %}<div></div>{% endif %}
+        </div>
+
+        <!-- Related Sections -->
+        {% if related_sections %}
+        <div>
+            <h2 style="font-size:1.5rem; margin-bottom:var(--space-6);">Related Sections from {{ act.short_name }}</h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                {% for related in related_sections %}
+                <a href="{{ url_for('main.view_section', section_id=related.id) }}" class="card card-accent"
+                    style="text-decoration:none; border:2px solid rgba(var(--navy-rgb),0.04);">
+                    <div class="card-body"
+                        style="padding:var(--space-4); display:flex; align-items:flex-start; gap:var(--space-3);">
+                        <span class="badge badge-green" style="font-weight:700; white-space:nowrap;">{{
+                            related.section_number }}</span>
+                        <div style="min-width:0;">
+                            <h3
+                                style="font-family:var(--font-sans); font-weight:700; font-size:0.875rem; color:var(--navy); margin-bottom:var(--space-1); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                                {{ related.title }}</h3>
+                            <p
+                                style="font-size:0.75rem; color:var(--text-muted); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                                {{ related.description }}</p>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Quick Actions -->
+        <div
+            style="margin-top:var(--space-8); display:flex; flex-wrap:wrap; gap:var(--space-4); justify-content:center;">
+            <a href="{{ url_for('main.browse_laws') }}" class="btn btn-outline" aria-label="Back to Browse Laws">← Back
+                to Browse Laws</a>
+            <a href="{{ url_for('main.view_act', act_id=act.id) }}" class="btn btn-accent"
+                aria-label="View all sections">View All Sections of {{ act.short_name }}</a>
+        </div>
+    </div>
+</section>
+
+<style>
+    @media (max-width: 640px) {
+        div[style*="grid-template-columns:1fr 1fr"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

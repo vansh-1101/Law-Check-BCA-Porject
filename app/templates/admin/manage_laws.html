@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Laws — LegalConnect Admin{% endblock %}
+
+{% block content %}
+<div style="max-width:1200px; margin:0 auto; padding:var(--space-12) var(--space-6);">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-8); flex-wrap:wrap; gap:var(--space-4);"
+        class="animate-fade-up">
+        <div>
+            <div style="display:flex; align-items:center; gap:var(--space-3); margin-bottom:var(--space-2);">
+                <h1 style="font-size:1.75rem;">Manage Laws</h1>
+                <span class="badge badge-green" style="font-size:0.75rem;">⚖️ Legal Database</span>
+            </div>
+            <p style="color:var(--text-secondary);">Add, edit, or delete legal acts and sections.</p>
+        </div>
+        <a href="{{ url_for('admin.add_act') }}" class="btn btn-primary" aria-label="Add new act">
+            + Add New Act
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash-msg flash-{{ category }}" style="margin-bottom:var(--space-4);">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    {% if acts %}
+    {% for act in acts %}
+    <div class="admin-panel animate-fade-up" style="margin-bottom:var(--space-6);">
+        <!-- Act Header -->
+        <div
+            style="padding:var(--space-6); border-bottom:1px solid rgba(var(--navy-rgb),0.06); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-4);">
+            <div>
+                <h2 style="font-size:1.25rem; margin-bottom:var(--space-1);">
+                    {{ act.name }}
+                    <span
+                        style="font-size:0.8125rem; font-weight:400; color:var(--text-muted); margin-left:var(--space-2);">({{
+                        act.short_name }}, {{ act.year }})</span>
+                </h2>
+                <p style="font-size:0.8125rem; color:var(--text-secondary);">
+                    <span class="badge badge-navy">{{ act.category }}</span>
+                    <span style="margin-left:var(--space-2);">{{ act.total_sections }} sections</span>
+                </p>
+                {% if act.description %}
+                <p style="font-size:0.8125rem; color:var(--text-muted); margin-top:var(--space-2);">{{
+                    act.description[:120] }}{% if act.description|length > 120 %}...{% endif %}</p>
+                {% endif %}
+            </div>
+            <div style="display:flex; align-items:center; gap:var(--space-3);">
+                <a href="{{ url_for('admin.add_section', act_id=act.id) }}" class="btn btn-accent btn-sm"
+                    aria-label="Add section to {{ act.name }}">+ Add Section</a>
+                <a href="{{ url_for('admin.edit_act', act_id=act.id) }}" class="btn btn-outline btn-sm"
+                    style="border-color:var(--info); color:var(--info);" aria-label="Edit {{ act.name }}">Edit</a>
+                <form method="POST" action="{{ url_for('admin.delete_act', act_id=act.id) }}"
+                    onsubmit="return confirm('Delete {{ act.name }} and ALL its sections?')" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm"
+                        aria-label="Delete {{ act.name }}">Delete</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sections Table -->
+        {% set sections = act.sections.all() %}
+        {% if sections %}
+        <div style="overflow-x:auto;">
+            <table class="lc-table">
+                <thead>
+                    <tr>
+                        <th>Section</th>
+                        <th>Title</th>
+                        <th>Bailable</th>
+                        <th>Cognizable</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for section in sections %}
+                    <tr>
+                        <td
+                            style="font-weight:700; color:var(--navy); font-family:var(--font-sans); font-variant-numeric:tabular-nums;">
+                            {{ section.section_number }}</td>
+                        <td style="color:var(--text-secondary);">{{ section.title[:60] }}{% if section.title|length > 60
+                            %}...{% endif %}</td>
+                        <td>
+                            <span class="badge {% if section.is_bailable %}badge-green{% else %}badge-red{% endif %}">
+                                {{ 'Yes' if section.is_bailable else 'No' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {% if section.is_cognizable %}badge-red{% else %}badge-green{% endif %}">
+                                {{ 'Yes' if section.is_cognizable else 'No' }}
+                            </span>
+                        </td>
+                        <td style="text-align:right;">
+                            <div style="display:flex; gap:var(--space-2); justify-content:flex-end;">
+                                <a href="{{ url_for('admin.edit_section', section_id=section.id) }}"
+                                    class="btn btn-ghost btn-sm" style="color:var(--info);"
+                                    aria-label="Edit section {{ section.section_number }}">Edit</a>
+                                <form method="POST"
+                                    action="{{ url_for('admin.delete_section', section_id=section.id) }}"
+                                    onsubmit="return confirm('Delete section {{ section.section_number }}?')"
+                                    style="display:inline;">
+                                    <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--error);"
+                                        aria-label="Delete section {{ section.section_number }}">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="padding:var(--space-6); text-align:center;">
+            <p style="color:var(--text-muted);">No sections yet. <a
+                    href="{{ url_for('admin.add_section', act_id=act.id) }}"
+                    style="color:var(--navy); font-weight:600;">Add one</a></p>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="card" style="padding:var(--space-12); text-align:center;">
+        <p style="color:var(--text-muted); font-size:1.0625rem; margin-bottom:var(--space-4);">No legal acts found.</p>
+        <a href="{{ url_for('admin.add_act') }}" class="btn btn-primary" aria-label="Add your first act">+ Add Your
+            First Act</a>
+    </div>
+    {% endif %}
+
+    <div style="margin-top:var(--space-6);">
+        <a href="{{ url_for('admin.dashboard') }}" style="color:var(--navy); font-weight:600;">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

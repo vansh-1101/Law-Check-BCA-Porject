@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}About — LegalConnect India{% endblock %}
+
+{% block content %}
+<div style="max-width:960px; margin:0 auto; padding:var(--space-12) var(--space-6);">
+
+    <!-- Hero -->
+    <div style="text-align:center; margin-bottom:var(--space-16);" class="animate-fade-up">
+        <h1 style="margin-bottom:var(--space-4);">About LegalConnect India</h1>
+        <p style="font-size:1.125rem; color:var(--text-secondary); max-width:640px; margin:0 auto; line-height:1.7;">
+            Bridging the gap between individuals seeking legal advice and verified legal professionals across India.
+        </p>
+    </div>
+
+    <!-- Mission -->
+    <div class="card card-accent animate-fade-up animate-fade-up-delay-1" style="margin-bottom:var(--space-10);">
+        <div class="card-body" style="padding:var(--space-8);">
+            <h2 style="margin-bottom:var(--space-4); font-size:1.75rem;">Our Mission</h2>
+            <p style="font-size:1.0625rem; color:var(--text-secondary); line-height:1.8;">
+                To make legal consultation accessible, transparent, and efficient for every Indian citizen. We believe
+                everyone deserves quality legal guidance — regardless of location, income, or background. LegalConnect
+                empowers people to understand their rights, find the right lawyer, and get professional advice from
+                verified
+                advocates.
+            </p>
+        </div>
+    </div>
+
+    <!-- What We Offer Grid -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-6); margin-bottom:var(--space-10);">
+        <div class="feature-card card-accent reveal">
+            <div class="icon-box icon-box-hover" aria-hidden="true">⚖️</div>
+            <h3>Verified Lawyers</h3>
+            <p>Every lawyer on our platform is verified by our admin team. We check Bar Council IDs, credentials, and
+                experience to ensure you get authentic legal help.</p>
+        </div>
+
+        <div class="feature-card card-accent reveal" style="animation-delay:0.1s;">
+            <div class="icon-box icon-box-hover" aria-hidden="true">🔍</div>
+            <h3>Legal Problem Analyzer</h3>
+            <p>Describe your problem in plain language and our system maps it to relevant Indian laws — IPC sections,
+                Constitutional articles, and more.</p>
+        </div>
+
+        <div class="feature-card card-accent reveal" style="animation-delay:0.2s;">
+            <div class="icon-box icon-box-hover" aria-hidden="true">📚</div>
+            <h3>Browse Indian Laws</h3>
+            <p>Explore a comprehensive database of Indian legal acts — IPC, CrPC, Constitution, Consumer Protection Act,
+                and more. Search sections instantly.</p>
+        </div>
+
+        <div class="feature-card card-accent reveal" style="animation-delay:0.3s;">
+            <div class="icon-box icon-box-hover" aria-hidden="true">💬</div>
+            <h3>Direct Messaging</h3>
+            <p>Communicate directly and confidentially with your lawyer through our built-in messaging system.</p>
+        </div>
+    </div>
+
+    <!-- Coverage -->
+    <div class="reveal"
+        style="background:linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); border-radius:var(--radius-xl); padding:var(--space-10); margin-bottom:var(--space-10); color:var(--text-inverse);">
+        <h2 style="color:var(--text-inverse); margin-bottom:var(--space-6); font-size:1.75rem;">Areas We Cover</h2>
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:var(--space-4);">
+            <div style="background:rgba(255,255,255,0.08); border-radius:var(--radius-lg); padding:var(--space-4); text-align:center; transition:background var(--transition-fast);"
+                onmouseover="this.style.background='rgba(255,255,255,0.12)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                <p style="font-size:1.5rem; margin-bottom:var(--space-1);" aria-hidden="true">🏛️</p>
+                <p style="font-weight:600; font-size:0.875rem;">Civil Law</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); border-radius:var(--radius-lg); padding:var(--space-4); text-align:center; transition:background var(--transition-fast);"
+                onmouseover="this.style.background='rgba(255,255,255,0.12)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                <p style="font-size:1.5rem; margin-bottom:var(--space-1);" aria-hidden="true">🔒</p>
+                <p style="font-weight:600; font-size:0.875rem;">Criminal Law</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); border-radius:var(--radius-lg); padding:var(--space-4); text-align:center; transition:background var(--transition-fast);"
+                onmouseover="this.style.background='rgba(255,255,255,0.12)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                <p style="font-size:1.5rem; margin-bottom:var(--space-1);" aria-hidden="true">🏢</p>
+                <p style="font-weight:600; font-size:0.875rem;">Corporate Law</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); border-radius:var(--radius-lg); padding:var(--space-4); text-align:center; transition:background var(--transition-fast);"
+                onmouseover="this.style.background='rgba(255,255,255,0.12)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                <p style="font-size:1.5rem; margin-bottom:var(--space-1);" aria-hidden="true">👨‍👩‍👧</p>
+                <p style="font-weight:600; font-size:0.875rem;">Family Law</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); border-radius:var(--radius-lg); padding:var(--space-4); text-align:center; transition:background var(--transition-fast);"
+                onmouseover="this.style.background='rgba(255,255,255,0.12)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                <p style="font-size:1.5rem; margin-bottom:var(--space-1);" aria-hidden="true">🏠</p>
+                <p style="font-weight:600; font-size:0.875rem;">Property Law</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); border-radius:var(--radius-lg); padding:var(--space-4); text-align:center; transition:background var(--transition-fast);"
+                onmouseover="this.style.background='rgba(255,255,255,0.12)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                <p style="font-size:1.5rem; margin-bottom:var(--space-1);" aria-hidden="true">💻</p>
+                <p style="font-weight:600; font-size:0.875rem;">Cyber Law</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); border-radius:var(--radius-lg); padding:var(--space-4); text-align:center; transition:background var(--transition-fast);"
+                onmouseover="this.style.background='rgba(255,255,255,0.12)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                <p style="font-size:1.5rem; margin-bottom:var(--space-1);" aria-hidden="true">📋</p>
+                <p style="font-weight:600; font-size:0.875rem;">Consumer Law</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); border-radius:var(--radius-lg); padding:var(--space-4); text-align:center; transition:background var(--transition-fast);"
+                onmouseover="this.style.background='rgba(255,255,255,0.12)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                <p style="font-size:1.5rem; margin-bottom:var(--space-1);" aria-hidden="true">📜</p>
+                <p style="font-weight:600; font-size:0.875rem;">Constitutional Law</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-block reveal" style="padding:var(--space-12) var(--space-8);">
+        <h2>Ready to Get Started?</h2>
+        <p>Join LegalConnect today and find the right legal help for your needs.</p>
+        <div class="cta-actions">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-accent btn-lg" aria-label="Register now">Register
+                Now</a>
+            <a href="{{ url_for('main.analyze_problem') }}" class="btn btn-outline btn-lg"
+                aria-label="Analyze legal problem"
+                style="color:var(--text-inverse); border-color:rgba(255,255,255,0.3);">Analyze My Problem</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        div[style*="grid-template-columns:1fr 1fr"] {
+            grid-template-columns: 1fr !important;
+        }
+
+        div[style*="grid-template-columns:repeat(4"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+</style>
+{% endblock %}

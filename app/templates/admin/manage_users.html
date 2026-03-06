@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width:1200px; margin:0 auto; padding:var(--space-12) var(--space-6);">
+    <div style="margin-bottom:var(--space-8);" class="animate-fade-up">
+        <h1 style="font-size:2rem; margin-bottom:var(--space-2);">Manage Users</h1>
+        <p style="color:var(--text-secondary);">View and manage all platform users</p>
+    </div>
+
+    <div class="admin-panel animate-fade-up animate-fade-up-delay-1">
+        <div style="overflow-x:auto;">
+            <table class="lc-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td style="font-weight:700; color:var(--navy);">{{ user.full_name }}</td>
+                        <td style="font-size:0.875rem; color:var(--text-secondary);">{{ user.email }}</td>
+                        <td><span class="badge badge-navy">{{ user.role.title() }}</span></td>
+                        <td>
+                            <span class="badge {% if user.is_active %}badge-green{% else %}badge-red{% endif %}">
+                                {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td style="text-align:right;">
+                            {% if user.role != 'admin' %}
+                            <a href="{{ url_for('admin.toggle_user_active', user_id=user.id) }}"
+                                class="btn btn-ghost btn-sm" style="color:var(--navy);" aria-label="Toggle user status">
+                                {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="margin-top:var(--space-6);">
+        <a href="{{ url_for('admin.dashboard') }}" style="color:var(--navy); font-weight:600;">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
