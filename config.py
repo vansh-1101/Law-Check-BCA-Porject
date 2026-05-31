@@ -32,7 +32,7 @@ class Config:
     
     # Pagination
     ITEMS_PER_PAGE = 10
-    
+
     # Session Configuration
     PERMANENT_SESSION_LIFETIME = 3600  # 1 hour
 

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Payments — LegalConnect Admin{% endblock %}
+
+{% block content %}
+<div style="max-width:1200px; margin:0 auto; padding:var(--space-12) var(--space-6);">
+    <!-- Header -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:var(--space-8);" class="animate-fade-up">
+        <div>
+            <h1 style="font-size:2rem; margin-bottom:var(--space-2); color:var(--navy);">Manage Payments</h1>
+            <p style="color:var(--text-secondary);">Verify and confirm manual payment transactions</p>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline" style="padding:0.5rem 1rem;">← Back to Dashboard</a>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="margin-bottom:var(--space-6);">
+        {% for category, message in messages %}
+        <div class="alert {% if category == 'success' %}alert-success{% elif category == 'danger' %}alert-danger{% else %}alert-info{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="card animate-fade-up animate-fade-up-delay-1" style="transform:none; border-radius:1rem;">
+        <div class="card-body" style="padding:1rem 0;">
+            <div style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse; text-align:left;">
+                    <thead>
+                        <tr style="border-bottom:2px solid var(--bg-body); color:var(--text-secondary); font-size:0.875rem;">
+                            <th style="padding:1rem 1.5rem; font-weight:600;">Date</th>
+                            <th style="padding:1rem 1.5rem; font-weight:600;">Lawyer</th>
+                            <th style="padding:1rem 1.5rem; font-weight:600;">Method / Reference</th>
+                            <th style="padding:1rem 1.5rem; font-weight:600;">Amount</th>
+                            <th style="padding:1rem 1.5rem; font-weight:600;">Status</th>
+                            <th style="padding:1rem 1.5rem; text-align:right; font-weight:600;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr style="border-bottom:1px solid var(--bg-body);">
+                            <td style="padding:1rem 1.5rem; color:var(--text-secondary); font-size:0.875rem;">
+                                {{ payment.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            </td>
+                            <td style="padding:1rem 1.5rem;">
+                                <div style="font-weight:600; color:var(--navy);">{{ payment.user.full_name }}</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted);">{{ payment.user.email }}</div>
+                            </td>
+                            <td style="padding:1rem 1.5rem; font-size:0.875rem;">
+                                <div style="text-transform:uppercase; font-weight:600;">{{ payment.payment_method }}</div>
+                                <div style="font-family:monospace; color:var(--text-secondary);">{{ payment.transaction_id or 'N/A' }}</div>
+                            </td>
+                            <td style="padding:1rem 1.5rem; font-weight:700; color:var(--gold);">
+                                ₹{{ "%.2f"|format(payment.amount) }}
+                            </td>
+                            <td style="padding:1rem 1.5rem;">
+                                {% if payment.status == 'processing' %}
+                                <span class="badge badge-gold">Processing</span>
+                                {% elif payment.status == 'completed' %}
+                                <span class="badge badge-green">Completed</span>
+                                {% elif payment.status == 'failed' %}
+                                <span class="badge badge-red">Failed</span>
+                                {% else %}
+                                <span class="badge">{{ payment.status.title() }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding:1rem 1.5rem; text-align:right;">
+                                {% if payment.status == 'processing' %}
+                                <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                                    <form method="POST" action="{{ url_for('admin.verify_payment', payment_id=payment.id) }}">
+                                        <button class="btn btn-accent btn-sm" onclick="return confirm('Confirm payment is received?');">✓ Verify</button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('admin.fail_payment', payment_id=payment.id) }}">
+                                        <button class="btn btn-danger btn-sm" onclick="return confirm('Mark as failed/invalid?');">✗ Reject</button>
+                                    </form>
+                                </div>
+                                {% else %}
+                                <span style="color:var(--text-muted); font-size:0.8125rem;">No actions</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" style="padding:3rem; text-align:center; color:var(--text-secondary);">
+                                No payment records found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

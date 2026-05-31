@@ -39,8 +39,9 @@ def dashboard():
         .filter(LawyerProfile.verification_status == 'pending')\
         .all()
 
-    recent_consultations = Consultation.query\
-        .order_by(Consultation.created_at.desc())\
+    from app.models import LawyerPayment
+    pending_payments = LawyerPayment.query.filter_by(status='processing')\
+        .order_by(LawyerPayment.created_at.desc())\
         .limit(10)\
         .all()
 
@@ -54,7 +55,60 @@ def dashboard():
                          total_sections=total_sections,
                          total_messages=total_messages,
                          pending_lawyers=pending_lawyers,
-                         recent_consultations=recent_consultations)
+                         pending_payments=pending_payments)
+
+
+@admin_bp.route('/payments')
+@login_required
+@admin_required
+def manage_payments():
+    """View and manage pending manual payments"""
+    from app.models import LawyerPayment
+    payments = LawyerPayment.query.filter(LawyerPayment.status != 'created')\
+        .order_by(LawyerPayment.created_at.desc())\
+        .all()
+
+    return render_template('admin/manage_payments.html',
+                         title='Manage Payments',
+                         payments=payments)
+
+
+@admin_bp.route('/payment/<int:payment_id>/verify', methods=['POST'])
+@login_required
+@admin_required
+def verify_payment(payment_id):
+    """Admin manually verifies a payment"""
+    from app.models import LawyerPayment
+    from datetime import datetime
+    
+    payment = LawyerPayment.query.get_or_404(payment_id)
+    if payment.status == 'processing':
+        payment.status = 'completed'
+        payment.completed_at = datetime.utcnow()
+        db.session.commit()
+        flash(f'Payment for {payment.user.full_name} marked as completed.', 'success')
+    else:
+        flash('Payment is already completed or failed.', 'info')
+        
+    return redirect(request.referrer or url_for('admin.manage_payments'))
+
+@admin_bp.route('/payment/<int:payment_id>/fail', methods=['POST'])
+@login_required
+@admin_required
+def fail_payment(payment_id):
+    """Admin marks a payment as Failed/Invalid"""
+    from app.models import LawyerPayment
+    from datetime import datetime
+    
+    payment = LawyerPayment.query.get_or_404(payment_id)
+    if payment.status == 'processing':
+        payment.status = 'failed'
+        payment.completed_at = datetime.utcnow()
+        db.session.commit()
+        flash(f'Payment for {payment.user.full_name} marked as failed.', 'danger')
+        
+    return redirect(request.referrer or url_for('admin.manage_payments'))
+
 
 
 @admin_bp.route('/lawyers/pending')

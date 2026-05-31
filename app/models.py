@@ -4,6 +4,7 @@ Database models for Legal Consultation Platform
 from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+import secrets
 from app import db, login_manager
 
 
@@ -156,8 +157,22 @@ class ContactMessage(db.Model):
     email = db.Column(db.String(120), nullable=False)
     subject = db.Column(db.String(200), nullable=False)
     message = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    def __repr__(self):
-        return f'<ContactMessage {self.id} - {self.subject}>'
+class LawyerPayment(db.Model):
+    """Tracks lawyer membership/registration payments (Manual Verification)"""
+    __tablename__ = 'lawyer_payments'
 
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user = db.relationship('User', backref='payments')
+    amount = db.Column(db.Float, default=2.0, nullable=False)  # ₹2 fixed fee
+    payment_type = db.Column(db.String(20), default='membership')  # 'membership' or 'one_time'
+    payment_method = db.Column(db.String(20))  # 'qr', 'card'
+    transaction_id = db.Column(db.String(100), unique=True)  # reference number entered by user
+    card_last4 = db.Column(db.String(4))  # last 4 digits of card (for card payments)
+    status = db.Column(db.String(20), default='processing')  # 'pending', 'processing', 'completed', 'failed'
+    order_token = db.Column(db.String(64), unique=True)  # secure session token
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return f'<LawyerPayment {self.id} - {self.status}>'

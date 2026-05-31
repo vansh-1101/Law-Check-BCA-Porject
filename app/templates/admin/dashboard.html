@@ -50,6 +50,9 @@
         <a href="{{ url_for('admin.manage_laws') }}" class="tab-btn tab-btn-accent" aria-label="Manage laws">
             ⚖️ Manage Laws
         </a>
+        <a href="{{ url_for('admin.manage_payments') }}" class="tab-btn" style="background:var(--gold); color:var(--bg-light);" aria-label="Manage payments">
+            💳 Manage Payments
+        </a>
     </div>
 
     <!-- ═══ Panels ═══ -->
@@ -93,42 +96,40 @@
             </div>
         </div>
 
-        <!-- Recent Consultations -->
+                        <!-- Recent Consultations (Removed for brevity, we can add Pending Payments here instead) -->
         <div class="admin-panel">
             <div class="admin-panel-header">
-                <h2 style="font-size:1.375rem;">Recent Consultations</h2>
+                <h2 style="font-size:1.375rem;">Pending Payments</h2>
             </div>
             <div class="admin-panel-body">
-                {% if recent_consultations %}
+                {% if pending_payments %}
                 <div style="display:flex; flex-direction:column; gap:var(--space-4);">
-                    {% for consultation in recent_consultations %}
+                    {% for payment in pending_payments[:5] %}
                     <div class="card" style="transform:none;">
                         <div class="card-body" style="padding:var(--space-4);">
-                            <div
-                                style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--space-2);">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--space-2);">
                                 <div>
-                                    <p style="font-weight:700; color:var(--navy);">{{ consultation.customer.full_name }}
+                                    <p style="font-weight:700; color:var(--navy);">
+                                        {{ payment.user.full_name }} <span style="font-size:0.8rem; font-weight:normal;">(₹{{ payment.amount }})</span>
                                     </p>
-                                    <p style="font-size:0.8125rem; color:var(--text-secondary);">with {{
-                                        consultation.lawyer.full_name }}</p>
+                                    <p style="font-size:0.8125rem; color:var(--text-secondary);">Ref: {{ payment.transaction_id }}</p>
                                 </div>
-                                <span class="badge
-                                    {% if consultation.status == 'pending' %}badge-gold
-                                    {% elif consultation.status == 'confirmed' %}badge-navy
-                                    {% elif consultation.status == 'completed' %}badge-green
-                                    {% else %}badge-red{% endif %}">
-                                    {{ consultation.status.title() }}
-                                </span>
+                                <span class="badge badge-gold">Processing</span>
                             </div>
-                            <p style="font-size:0.75rem; color:var(--text-muted);">{{
-                                consultation.created_at.strftime('%B %d, %Y') }}</p>
+                            <div style="display:flex; gap:var(--space-2); margin-top:var(--space-2);">
+                                <form method="POST" action="{{ url_for('admin.verify_payment', payment_id=payment.id) }}" style="display:inline;">
+                                    <button class="btn btn-accent btn-sm">Confirm Payment</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
+                {% if pending_payments|length > 5 %}
+                <a href="{{ url_for('admin.manage_payments') }}" style="display:block; text-align:center; margin-top:var(--space-4); color:var(--navy); font-weight:600;">View All →</a>
+                {% endif %}
                 {% else %}
-                <p style="color:var(--text-secondary); text-align:center; padding:var(--space-8) 0;">No consultations
-                    yet</p>
+                <p style="color:var(--text-secondary); text-align:center; padding:var(--space-8) 0;">No pending payments</p>
                 {% endif %}
             </div>
         </div>

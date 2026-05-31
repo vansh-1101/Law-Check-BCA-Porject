@@ -285,10 +285,79 @@ def analyze_problem():
                          title='Legal Problem Analyzer')
 
 
+def _word_similarity(word1, word2):
+    """
+    Simple character-level similarity between two words (0-1).
+    Uses longest-common-subsequence ratio so typos like 'rapped'↔'raped' score high.
+    """
+    if word1 == word2:
+        return 1.0
+    if not word1 or not word2:
+        return 0.0
+    # Longest Common Subsequence length
+    m, n = len(word1), len(word2)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if word1[i - 1] == word2[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            else:
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+    lcs = dp[m][n]
+    return (2.0 * lcs) / (m + n)
+
+
+# Common misspellings / colloquial → canonical legal terms
+_SYNONYM_MAP = {
+    # rape / sexual assault
+    'rapped': 'raped', 'raped': 'rape', 'raping': 'rape', 'rapp': 'rape',
+    'molest': 'molestation', 'molested': 'molestation',
+    # brain / pain (common misspelling targets)
+    'bain': 'pain', 'brane': 'brain', 'pane': 'pain',
+    # assault / beating
+    'beeten': 'beaten', 'beated': 'beaten', 'attaked': 'attacked',
+    'assalt': 'assault', 'assulted': 'assault', 'asault': 'assault',
+    # theft
+    'stoled': 'stolen', 'stealed': 'stolen', 'theif': 'theft', 'theaft': 'theft',
+    # murder
+    'murdar': 'murder', 'killled': 'killed', 'murderd': 'murder',
+    # cheating/fraud
+    'cheeted': 'cheated', 'frod': 'fraud', 'frawd': 'fraud', 'scamed': 'scammed',
+    # harassment
+    'harasment': 'harassment', 'harased': 'harassed', 'harrassment': 'harassment',
+    # kidnapping
+    'kidnaped': 'kidnapped', 'kidnaping': 'kidnapping',
+    # threat
+    'threten': 'threatened', 'thretened': 'threatened', 'threting': 'threatening',
+    # dowry
+    'dahej': 'dowry', 'dahej': 'dowry',
+    # stalking
+    'staking': 'stalking', 'stalked': 'stalking',
+    # drugs
+    'druges': 'drugs', 'ganga': 'ganja',
+    # accident
+    'accidant': 'accident', 'acident': 'accident',
+    # abuse
+    'abused': 'abuse', 'abusing': 'abuse',
+    # domestic  
+    'domestik': 'domestic',
+    # defamation
+    'defamashion': 'defamation',
+    # blackmail
+    'blakmail': 'blackmail', 'blakmaild': 'blackmailed',
+    # trespass
+    'trespassd': 'trespass',
+    # robbery
+    'robed': 'robbed', 'roberry': 'robbery',
+    # someone / person
+    'sum1': 'someone', 'sumone': 'someone',
+}
+
+
 def analyze_legal_problem(description):
     """
     Analyze user's problem description and find matching legal sections
-    using keyword matching algorithm
+    using enhanced keyword matching with fuzzy/synonym support.
     
     Args:
         description: User's problem description
@@ -296,45 +365,91 @@ def analyze_legal_problem(description):
     Returns:
         List of matching sections with relevance scores
     """
-    # Convert to lowercase for case-insensitive matching
-    description_lower = description.lower()
-    
-    # Get all sections with keywords
-    all_sections = LegalSection.query.filter(LegalSection.keywords.isnot(None)).all()
-    
+    import re as _re
+
+    description_lower = description.lower().strip()
+
+    # Tokenize the description into words
+    desc_words = _re.findall(r'[a-z]+', description_lower)
+
+    # Expand with synonyms / corrected spellings
+    expanded_words = set(desc_words)
+    for w in desc_words:
+        if w in _SYNONYM_MAP:
+            expanded_words.add(_SYNONYM_MAP[w])
+    # Also add the full description for phrase-level matching
+    expanded_text = ' '.join(expanded_words) + ' ' + description_lower
+
+    # Get all sections (including those without keywords for broader matching)
+    all_sections = LegalSection.query.all()
+
     matching_sections = []
-    
+
     for section in all_sections:
-        if not section.keywords:
-            continue
-            
-        # Split keywords and clean them
-        keywords = [k.strip().lower() for k in section.keywords.split(',')]
-        
-        # Calculate match score
-        score = 0
+        score = 0.0
         matched_keywords = []
-        
-        for keyword in keywords:
-            if keyword in description_lower:
-                score += 1
-                matched_keywords.append(keyword)
-        
-        # If there are matches, add to results
-        if score > 0:
+
+        # --- 1. Keyword matching (primary) ---
+        if section.keywords:
+            keywords = [k.strip().lower() for k in section.keywords.split(',')]
+            for keyword in keywords:
+                kw_words = keyword.split()
+
+                # Exact phrase match in expanded text
+                if keyword in expanded_text:
+                    score += 3
+                    matched_keywords.append(keyword)
+                    continue
+
+                # Word-level fuzzy match: check if any description word is similar
+                best_sim = 0
+                for kw_word in kw_words:
+                    if len(kw_word) < 3:
+                        continue
+                    for desc_word in expanded_words:
+                        if len(desc_word) < 3:
+                            continue
+                        sim = _word_similarity(kw_word, desc_word)
+                        if sim > best_sim:
+                            best_sim = sim
+
+                if best_sim >= 0.80:
+                    score += 2
+                    matched_keywords.append(keyword)
+                elif best_sim >= 0.65:
+                    score += 1
+                    matched_keywords.append(keyword)
+
+        # --- 2. Title / description matching (secondary, lower weight) ---
+        title_lower = (section.title or '').lower()
+        desc_section = (section.description or '').lower()
+
+        for word in expanded_words:
+            if len(word) < 4:
+                continue
+            if word in title_lower:
+                score += 1.5
+                if word not in matched_keywords:
+                    matched_keywords.append(word)
+            elif word in desc_section:
+                score += 0.5
+
+        # Only include if there's a meaningful match
+        if score >= 2:
+            total_keywords = len(section.keywords.split(',')) if section.keywords else 1
             matching_sections.append({
                 'section': section,
                 'act': section.act,
                 'score': score,
                 'matched_keywords': matched_keywords,
-                'relevance_percentage': min(100, (score / len(keywords)) * 100)
+                'relevance_percentage': min(100, (score / max(total_keywords, 1)) * 100)
             })
-    
+
     # Sort by score (highest first)
     matching_sections.sort(key=lambda x: x['score'], reverse=True)
-    
-    # Return top 5 matches
-    return matching_sections[:5]
+
+    # Return top 10 matches
+    return matching_sections[:10]
 
 
 @main_bp.route('/api/example-problems')

@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Membership Payment — LegalConnect{% endblock %}
+
+{% block content %}
+<div class="animate-fade-up" style="max-width:800px; margin:var(--space-12) auto; padding:0 var(--space-6);">
+
+    <!-- Header -->
+    <div style="text-align:center; margin-bottom:var(--space-8);">
+        <span class="badge badge-gold" style="margin-bottom:var(--space-4);">Lawyer Registration</span>
+        <h1 style="font-size:2.5rem; margin-bottom:var(--space-2); color:var(--navy);">Complete Your Membership</h1>
+        <p style="color:var(--text-secondary); font-size:1.1rem;">A one-time fee of ₹2 is required to activate your lawyer account.</p>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="margin-bottom:var(--space-6);">
+        {% for category, message in messages %}
+        <div class="alert {% if category == 'success' %}alert-success{% elif category == 'danger' %}alert-danger{% else %}alert-info{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-body" style="padding:var(--space-8);">
+
+            <!-- Order Summary -->
+            <div style="background:var(--bg-light); border-radius:0.5rem; padding:var(--space-6); margin-bottom:var(--space-8); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h3 style="color:var(--navy); margin-bottom:0.25rem;">Lawyer Membership Fee</h3>
+                    <p style="color:var(--text-secondary); margin:0;">User: {{ user.full_name }} ({{ user.email }})</p>
+                </div>
+                <div style="text-align:right;">
+                    <span style="font-size:2rem; font-weight:800; color:var(--gold);">₹2.00</span>
+                </div>
+            </div>
+
+            <!-- ===== Payment Method Tabs ===== -->
+            <div style="margin-bottom:var(--space-6);">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3);">
+                    <button type="button" id="tab-qr" class="btn btn-primary"
+                        onclick="switchTab('qr')"
+                        style="border:2px solid var(--navy); font-size:1rem; padding:0.75rem 1rem; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                        📱 UPI / QR Code
+                    </button>
+                    <button type="button" id="tab-card" class="btn btn-outline"
+                        onclick="switchTab('card')"
+                        style="border:2px solid #cbd5e1; font-size:1rem; padding:0.75rem 1rem; display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#fff; color:var(--navy);">
+                        💳 Credit / Debit Card
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== TAB 1: QR Code / UPI Payment ===== -->
+            <div id="panel-qr" class="animate-fade-up">
+                <form method="POST" action="{{ url_for('auth.lawyer_payment') }}" novalidate>
+                    <input type="hidden" name="payment_method" value="qr">
+
+                    <!-- QR Code Display -->
+                    <div style="background:linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%); border:2px solid #c3d9f7; border-radius:1rem; padding:var(--space-6); margin-bottom:var(--space-6); text-align:center;">
+
+                        <div style="margin-bottom:var(--space-4);">
+                            <span style="display:inline-flex; align-items:center; gap:0.5rem; background:white; padding:0.5rem 1rem; border-radius:2rem; font-size:0.9rem; color:var(--navy); font-weight:600; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+                                📱 Scan with any UPI app
+                            </span>
+                        </div>
+
+                        <div style="background:white; display:inline-block; padding:1rem; border-radius:1rem; box-shadow:0 4px 20px rgba(0,0,0,0.08); margin-bottom:var(--space-4);">
+                            <img src="{{ url_for('static', filename='payment_qr.jpeg') }}"
+                                 alt="Payment QR Code — Scan to pay ₹2"
+                                 style="width:260px; height:260px; object-fit:contain; border-radius:0.5rem;">
+                        </div>
+
+                        <div style="margin-top:var(--space-3);">
+                            <p style="margin:0 0 0.25rem; font-size:0.95rem; font-weight:600; color:var(--navy);">UPI ID: darjivansh1101@okicici</p>
+                            <p style="margin:0; font-size:0.85rem; color:var(--text-secondary);">Pay exactly <strong>₹2.00</strong> using Google Pay, PhonePe, Paytm or any UPI app</p>
+                        </div>
+                    </div>
+
+                    <!-- Transaction Details After Payment -->
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:0.5rem; padding:var(--space-6); margin-bottom:var(--space-6);">
+                        <h4 style="color:var(--navy); margin-bottom:var(--space-4); font-size:1.05rem;">
+                            ✅ After payment, enter your transaction details:
+                        </h4>
+
+                        <div class="form-group" style="margin-bottom:var(--space-4);">
+                            <label class="form-label" for="upi_transaction_id">UPI Transaction ID / Reference Number *</label>
+                            <input type="text" id="upi_transaction_id" name="upi_transaction_id" class="form-control"
+                                   placeholder="e.g. 412345678901 or UTR number">
+                            {% if errors and errors.upi_transaction_id %}
+                            <div class="form-error" style="color:red; font-size:0.875rem; margin-top:0.25rem;">{{ errors.upi_transaction_id }}</div>
+                            {% endif %}
+                            <small style="color:var(--text-secondary); display:block; margin-top:0.25rem;">
+                                You can find this in your UPI app under transaction history / payment receipt.
+                            </small>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom:var(--space-4);">
+                            <label class="form-label" for="upi_payer_name">Your Name (as on UPI app) *</label>
+                            <input type="text" id="upi_payer_name" name="upi_payer_name" class="form-control"
+                                   placeholder="e.g. Rajesh Kumar" value="{{ user.full_name }}">
+                            {% if errors and errors.upi_payer_name %}
+                            <div class="form-error" style="color:red; font-size:0.875rem; margin-top:0.25rem;">{{ errors.upi_payer_name }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:center;">
+                        <button type="submit" class="btn btn-primary"
+                                style="font-size:1.1rem; padding:0.75rem 2rem; width:100%; max-width:350px; background:linear-gradient(135deg, var(--navy), #2563eb);">
+                            ✅ I've Paid — Submit for Verification
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ===== TAB 2: Card Payment ===== -->
+            <div id="panel-card" class="animate-fade-up" style="display:none;">
+                <form method="POST" action="{{ url_for('auth.lawyer_payment') }}" novalidate>
+                    <input type="hidden" name="payment_method" value="card">
+
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:0.5rem; padding:var(--space-6); margin-bottom:var(--space-6);">
+
+                        <div class="form-group" style="margin-bottom:var(--space-4);">
+                            <label class="form-label" for="card_number">Card Number *</label>
+                            <input type="text" id="card_number" name="card_number" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19">
+                            {% if errors and errors.card_number %}
+                            <div class="form-error" style="color:red; font-size:0.875rem; margin-top:0.25rem;">{{ errors.card_number }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group" style="margin-bottom:var(--space-4);">
+                            <label class="form-label" for="card_name">Name on Card *</label>
+                            <input type="text" id="card_name" name="card_name" class="form-control" placeholder="Full Name">
+                            {% if errors and errors.card_name %}
+                            <div class="form-error" style="color:red; font-size:0.875rem; margin-top:0.25rem;">{{ errors.card_name }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                            <div class="form-group">
+                                <label class="form-label" for="card_expiry">Expiry Date *</label>
+                                <input type="text" id="card_expiry" name="card_expiry" class="form-control" placeholder="MM/YY" maxlength="5">
+                                {% if errors and errors.card_expiry %}
+                                <div class="form-error" style="color:red; font-size:0.875rem; margin-top:0.25rem;">{{ errors.card_expiry }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="card_cvv">CVV *</label>
+                                <input type="password" id="card_cvv" name="card_cvv" class="form-control" placeholder="123" maxlength="4">
+                                {% if errors and errors.card_cvv %}
+                                <div class="form-error" style="color:red; font-size:0.875rem; margin-top:0.25rem;">{{ errors.card_cvv }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:center;">
+                        <button type="submit" class="btn btn-primary"
+                                style="font-size:1.1rem; padding:0.75rem 2rem; width:100%; max-width:350px;">
+                            Submit Payment Details
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Security Note -->
+            <div style="text-align:center; margin-top:var(--space-6); padding-top:var(--space-4); border-top:1px solid #e2e8f0;">
+                <p style="color:var(--text-secondary); font-size:0.85rem; margin:0;">
+                    🔒 Your payment details are secure. An admin will verify the transaction and activate your account.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function switchTab(tab) {
+    const tabQr   = document.getElementById('tab-qr');
+    const tabCard  = document.getElementById('tab-card');
+    const panelQr  = document.getElementById('panel-qr');
+    const panelCard = document.getElementById('panel-card');
+
+    if (tab === 'qr') {
+        tabQr.className = 'btn btn-primary';
+        tabQr.style.border = '2px solid var(--navy)';
+        tabQr.style.background = '';
+        tabQr.style.color = '';
+
+        tabCard.className = 'btn btn-outline';
+        tabCard.style.border = '2px solid #cbd5e1';
+        tabCard.style.background = '#fff';
+        tabCard.style.color = 'var(--navy)';
+
+        panelQr.style.display = 'block';
+        panelCard.style.display = 'none';
+    } else {
+        tabCard.className = 'btn btn-primary';
+        tabCard.style.border = '2px solid var(--navy)';
+        tabCard.style.background = '';
+        tabCard.style.color = '';
+
+        tabQr.className = 'btn btn-outline';
+        tabQr.style.border = '2px solid #cbd5e1';
+        tabQr.style.background = '#fff';
+        tabQr.style.color = 'var(--navy)';
+
+        panelCard.style.display = 'block';
+        panelQr.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}
